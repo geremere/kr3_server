@@ -12,6 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api")
 public class UserController {
@@ -26,6 +31,13 @@ public class UserController {
     public UserSummary getCurrentUser(@CurrentUser UserPrincipal currentUser) {
         UserSummary userSummary = new UserSummary(currentUser.getId(), currentUser.getUsername(), currentUser.getName());
         return userSummary;
+    }
+
+    @GetMapping("/users/all")
+    @PreAuthorize("hasRole('USER')")
+    public List<UserSummary> getAllUser(@CurrentUser UserPrincipal currentUser) {
+        List<UserSummary> allUsers = userRepository.findAll().stream().map(user->new UserSummary(user.getId(),user.getUsername(),user.getName())).collect(Collectors.toList());
+        return allUsers;
     }
 
     @GetMapping("/user/checkUsernameAvailability")
