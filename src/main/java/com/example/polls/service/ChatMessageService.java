@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -47,9 +48,9 @@ public class ChatMessageService {
     }
 
     public List<ChatMessage> findChatMessages(Long senderId, Long recipientId) {
-        var chatId = chatRoomService.getChatId(senderId, recipientId, false);
+        Optional<String> chatId = chatRoomService.getChatId(senderId, recipientId, false);
 
-        var messages =
+        List<ChatMessage> messages =
                 chatId.map(cId -> repository.findByChatId(cId)).orElse(new ArrayList<>());
 
         MessageStatus status = messageStatusRepository.findByName(MessageStatusName.DELIVERED).
