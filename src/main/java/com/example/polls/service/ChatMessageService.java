@@ -5,26 +5,40 @@ import com.example.polls.exception.ResourceNotFoundException;
 import com.example.polls.model.chat.ChatMessage;
 import com.example.polls.model.chat.MessageStatus;
 import com.example.polls.model.chat.MessageStatusName;
+import com.example.polls.payload.requests.ChatMessageRequest;
+import com.example.polls.payload.requests.MessageStatusRequest;
 import com.example.polls.repository.ChatMessageRepository;
 import com.example.polls.repository.MessageStatusRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class ChatMessageService {
-    @Autowired private ChatMessageRepository repository;
-    @Autowired private ChatRoomService chatRoomService;
-    @Autowired private MessageStatusRepository messageStatusRepository;
+    private final ChatMessageRepository repository;
+    private final ChatRoomService chatRoomService;
+    private final MessageStatusRepository messageStatusRepository;
 
-    public ChatMessage save(ChatMessage chatMessage) {
-        MessageStatus status = messageStatusRepository.findByName(MessageStatusName.RECEIVED).
+    @Transactional
+    public ChatMessage save(ChatMessageRequest chatMessage) {
+        MessageStatus status =  messageStatusRepository.findByName(MessageStatusName.RECEIVED).
                 orElseThrow(() -> new AppException("some error with set status for message"));
-
-        chatMessage.setStatus(status);
-        repository.save(chatMessage);
-        return chatMessage;
+//        MessageStatusRequest statusRequest = MessageStatusRequest.builder().id(status.getId()).name(status.getName()).build();
+        ChatMessage chatMessageEntity = new ChatMessage();
+        chatMessageEntity.setChatId(chatMessage.getChatId());
+        chatMessageEntity.setContent(chatMessage.getContent());
+        chatMessageEntity.setRecipientId(chatMessage.getRecipientId());
+        chatMessageEntity.setRecipientName(chatMessage.getRecipientName());
+        chatMessageEntity.setSenderId(chatMessage.getSenderId());
+        chatMessageEntity.setSenderName(chatMessage.getSenderName());
+        chatMessageEntity.setStatus(status);
+        repository.save(chatMessageEntity);
+        return chatMessageEntity;
     }
 
     public long countNewMessages(Long senderId, Long recipientId) {
@@ -41,7 +55,7 @@ public class ChatMessageService {
         MessageStatus status = messageStatusRepository.findByName(MessageStatusName.DELIVERED).
                 orElseThrow(() -> new AppException("some error with set status for message"));
 
-        for(ChatMessage mess : messages){
+        for (ChatMessage mess : messages) {
             mess.setStatus(status);
             repository.save(mess);
         }
@@ -59,6 +73,6 @@ public class ChatMessageService {
                     return repository.save(chatMessage);
                 })
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("findById message","id",id));
+                        new ResourceNotFoundException("findById message", "id", id));
     }
 }

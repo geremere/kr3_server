@@ -2,8 +2,12 @@ package com.example.polls.controller;
 
 
 
+import com.example.polls.exception.AppException;
 import com.example.polls.model.chat.ChatMessage;
 import com.example.polls.model.chat.ChatNotification;
+import com.example.polls.model.chat.MessageStatus;
+import com.example.polls.model.chat.MessageStatusName;
+import com.example.polls.payload.requests.ChatMessageRequest;
 import com.example.polls.repository.MessageStatusRepository;
 import com.example.polls.service.ChatMessageService;
 import com.example.polls.service.ChatRoomService;
@@ -15,6 +19,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class ChatController {
@@ -25,12 +30,16 @@ public class ChatController {
     private ChatMessageService chatMessageService;
     @Autowired
     private ChatRoomService chatRoomService;
+    @Autowired
+    private MessageStatusRepository messageStatusRepository;
 
 
     @MessageMapping("/chat")
-    public void processMessage(@Payload ChatMessage chatMessage) {
+    public void processMessage(@Payload ChatMessageRequest chatMessage) {
         var chatId = chatRoomService
                 .getChatId(chatMessage.getSenderId(), chatMessage.getRecipientId(), true);
+
+
         chatMessage.setChatId(chatId.get());
 
         ChatMessage saved = chatMessageService.save(chatMessage);
@@ -67,6 +76,6 @@ public class ChatController {
     @GetMapping("/messages/status/{id}")
     public ResponseEntity<?> getStatus ( @PathVariable Long id) {
         return ResponseEntity
-                .ok(chatMessageService.findById(id).getStatus());
+                .ok(chatMessageService.findById(id).getStatus().getName());
     }
 }

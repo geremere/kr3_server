@@ -1,12 +1,13 @@
 package com.example.polls.model.chat;
 
-import com.example.polls.model.user.RegTypeName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,6 +24,6 @@ public class MessageStatus {
     @Column(length = 60)
     private MessageStatusName name;
 
-    @OneToOne(mappedBy = "status")
-    private ChatMessage chatMessage;
+    @OneToMany(mappedBy = "status")
+    private List<ChatMessage> chatMessage = new ArrayList<>();
 }

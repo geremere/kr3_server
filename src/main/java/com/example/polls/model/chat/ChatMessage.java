@@ -9,26 +9,38 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.Date;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 @Entity
 @Data
 @Table(name = "chatmessage")
-public class ChatMessage extends DateAudit {
+public class ChatMessage{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String chatId;
-    private Long senderId;
-    private Long recipientId;
-    private String senderName;
-    private String recipientName;
-    private String content;
-    private Long status_id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "status_id", referencedColumnName = "id", insertable=false, updatable=false)
+    @Column(name="chat_id")
+    private String chatId;
+
+    @Column(name="sender_id")
+    private Long senderId;
+
+    @Column(name="recipient_id")
+    private Long recipientId;
+
+    @Column(name="sender_name")
+    private String senderName;
+
+    @Column(name="recipient_name")
+    private String recipientName;
+
+    @Column(name="content")
+    private String content;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "status_id")
     private MessageStatus status;
+
+//    @OneToMany(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "status_id", referencedColumnName = "id", insertable=false, updatable=false)
+//    private MessageStatus status;
 }
