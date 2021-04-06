@@ -49,17 +49,27 @@ CREATE TABLE messageStatus
     PRIMARY KEY (id)
 ) ;
 
+
+CREATE TABLE chatRoom
+(
+    id SERIAL4,
+    chat_id varchar(255)  NOT NULL,
+    sender_id bigint NOT NULL,
+    recipient_id bigint NOT NULL,
+    PRIMARY KEY (id)
+);
+
 CREATE TABLE chatMessage
 (
     id SERIAL4,
     chat_id varchar(255)  NOT NULL,
     sender_id bigint NOT NULL,
-    recipientId bigint NOT NULL,
-    sender_name varchar(15)  NOT NULL unique ,
-    recipient_name varchar(15)  NOT NULL unique ,
+    recipient_id bigint NOT NULL,
+    sender_name varchar(15)  NOT NULL,
+    recipient_name varchar(15)  NOT NULL,
     content varchar(1000) NOT NULL,
     status_id bigint NOT NULL,
-    CONSTRAINT fk_user_roles_role_id FOREIGN KEY (status_id) REFERENCES messageStatus (id),
+    CONSTRAINT fk_chat_message_status_id FOREIGN KEY (status_id) REFERENCES messageStatus (id),
     PRIMARY KEY (id)
 );
 
@@ -71,11 +81,3 @@ CREATE TABLE chatNotification
     PRIMARY KEY (id)
 );
 
-CREATE TABLE chatRoom
-(
-    id varchar,
-    chat_id bigint  NOT NULL,
-    sender_id bigint NOT NULL,
-    recipient_id bigint NOT NULL,
-    PRIMARY KEY (id)
-);

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Optional;
 
@@ -38,11 +39,7 @@ public class ChatController {
 
     @MessageMapping("/chat")
     public void processMessage(@Payload ChatMessageRequest chatMessage) {
-        Optional<String> chatId = chatRoomService
-                .getChatId(chatMessage.getSenderId(), chatMessage.getRecipientId(), true);
 
-
-        chatMessage.setChatId(chatId.get());
 
         ChatMessage saved = chatMessageService.save(chatMessage);
         messagingTemplate.convertAndSendToUser(
@@ -70,6 +67,7 @@ public class ChatController {
     }
 
     @GetMapping("/messages/{id}")
+    @ResponseBody
     public ResponseEntity<?> findMessage ( @PathVariable Long id) {
         return ResponseEntity
                 .ok(chatMessageService.findById(id));

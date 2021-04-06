@@ -1,10 +1,7 @@
 package com.example.polls.model.chat;
 
 import com.example.polls.model.audit.DateAudit;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -12,6 +9,7 @@ import java.util.Date;
 @Entity
 @Data
 @Table(name = "chatmessage")
+@ToString
 public class ChatMessage{
 
     @Id
@@ -36,8 +34,7 @@ public class ChatMessage{
     @Column(name="content")
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "status_id")
+    @ManyToOne(fetch = FetchType.EAGER)
     private MessageStatus status;
 
 //    @OneToMany(cascade = CascadeType.ALL)
