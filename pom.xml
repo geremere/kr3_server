@@ -9,7 +9,7 @@
 	<packaging>jar</packaging>
 
 	<name>polls</name>
-	<description>Polling App built with Spring Boot, Spring Security, MySQL and JWT</description>
+	<description>Polling App built with Spring Boot, Spring Security, PostgreSQL and JWT</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -20,9 +20,9 @@
 	</parent>
 
 	<properties>
+		<java.version>11</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>11</java.version>
 		<jjwt.version>0.9.0</jjwt.version>
 	</properties>
 
