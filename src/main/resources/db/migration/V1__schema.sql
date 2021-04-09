@@ -1,3 +1,20 @@
+CREATE TABLE images
+(
+    image_id SERIAL4,
+    url varchar NOT NULL,
+    type varchar  NOT NULL ,
+    PRIMARY KEY (image_id)
+);
+
+CREATE TABLE files
+(
+    file_id SERIAL4,
+    url varchar NOT NULL,
+    type varchar  NOT NULL ,
+    PRIMARY KEY (file_id)
+);
+
+
 CREATE TABLE users
 (
     id         SERIAL,
@@ -5,8 +22,10 @@ CREATE TABLE users
     username   varchar(15)  NOT NULL unique ,
     email      varchar(40)  NOT NULL unique ,
     password   varchar(100) NOT NULL,
+    image_id bigint unique,
     created_at timestamp DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user_regtypes_type_id FOREIGN KEY (image_id) REFERENCES images (image_id) ,
     PRIMARY KEY (id)
 );
 
@@ -80,4 +99,5 @@ CREATE TABLE chatNotification
     sender_name varchar(15)  NOT NULL unique ,
     PRIMARY KEY (id)
 );
+
 

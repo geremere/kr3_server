@@ -1,6 +1,9 @@
 package com.example.polls.model.user;
 
+import com.example.polls.model.Amazon.Image;
 import com.example.polls.model.audit.DateAudit;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -40,6 +43,13 @@ public class User extends DateAudit {
     @NotBlank
     @Size(max = 100)
     private String password;
+
+    @OneToOne
+    @JoinColumn(name = "image_id")
+    @Getter
+    @Setter
+    private Image image;
+
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
