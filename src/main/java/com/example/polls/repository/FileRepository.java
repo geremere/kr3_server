@@ -1,13 +1,13 @@
 package com.example.polls.repository;
 
-import com.example.polls.model.File;
+import com.example.polls.model.Amazon.Image;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface FileRepository extends JpaRepository<File, Long> {
-    File findByFileId(Long fileId);
+public interface FileRepository extends JpaRepository<Image, Long> {
+    Image findByImageId(Long imageId);
 
-    List<File> findAllByUrlContains(String substring);
+    List<Image> findAllByUrlContains(String substring);
 }
 

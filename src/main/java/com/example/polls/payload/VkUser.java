@@ -11,6 +11,7 @@ public class VkUser {
     private @JsonProperty("is_closed") Boolean is_closed;
     private @JsonProperty("can_access_closed") Boolean can_access_closed;
     private String domain;
+
     private @JsonProperty("photo_50") String photo_50;
 
     public VkUser(){}
@@ -36,5 +37,9 @@ public class VkUser {
 
     public void setLast_name(String last_name) {
         this.last_name = last_name;
+    }
+
+    public String getPhoto_50(){
+        return photo_50;
     }
 }

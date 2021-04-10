@@ -1,8 +1,8 @@
 package com.example.polls.controller;
 
+import com.example.polls.exception.AppException;
 import com.example.polls.exception.ResourceNotFoundException;
 import com.example.polls.model.Amazon.Image;
-import com.example.polls.model.File;
 import com.example.polls.model.user.User;
 import com.example.polls.payload.*;
 import com.example.polls.payload.response.UploadFileResponse;
@@ -14,17 +14,12 @@ import com.example.polls.service.AWSImageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @RestController
@@ -45,14 +40,14 @@ public class UserController {
     @GetMapping("/user/me")
     @PreAuthorize("hasRole('USER')")
     public UserSummary getCurrentUser(@CurrentUser UserPrincipal currentUser) {
-        UserSummary userSummary = new UserSummary(currentUser.getId(), currentUser.getUsername(), currentUser.getName());
+        UserSummary userSummary = new UserSummary(currentUser.getId(), currentUser.getUsername(), currentUser.getName(),currentUser.getImage());
         return userSummary;
     }
 
     @GetMapping("/users/all")
     @PreAuthorize("hasRole('USER')")
     public List<UserSummary> getAllUser(@CurrentUser UserPrincipal currentUser) {
-        List<UserSummary> allUsers = userRepository.findAll().stream().map(user->new UserSummary(user.getId(),user.getUsername(),user.getName())).collect(Collectors.toList());
+        List<UserSummary> allUsers = userRepository.findAll().stream().map(user -> new UserSummary(user.getId(), user.getUsername(), user.getName(), user.getImage())).collect(Collectors.toList());
         return allUsers;
     }
 
@@ -79,10 +74,22 @@ public class UserController {
         return userProfile;
     }
 
-    @PostMapping("/image/{type}")
-    public UploadFileResponse uploadImage(@RequestParam(name = "file") MultipartFile file,
-                                          @PathVariable(name = "type") String type) throws IOException {
-        Image image = imageService.storeResourceImage(file, type);
+
+    @PostMapping("/user/me/image")
+    @PreAuthorize("hasRole('USER')")
+    public UploadFileResponse setUserImage(@CurrentUser UserPrincipal currentUser,
+                                           @RequestParam("file") MultipartFile file) throws IOException {
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new AppException("User didnt find in setUserIMage"));
+        if (user.getImage() != null)
+            imageService.deleteImage(user.getImage());
+        Image image = imageService.store(file);
+        Image tmp = user.getImage();
+        user.setImage(image);
+
+        userRepository.save(user);
+        fileRepository.delete(tmp);
+
         return new UploadFileResponse(image.getUrl(), image.getType(), file.getSize());
     }
 }

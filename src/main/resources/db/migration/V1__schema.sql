@@ -6,14 +6,6 @@ CREATE TABLE images
     PRIMARY KEY (image_id)
 );
 
-CREATE TABLE files
-(
-    file_id SERIAL4,
-    url varchar NOT NULL,
-    type varchar  NOT NULL ,
-    PRIMARY KEY (file_id)
-);
-
 
 CREATE TABLE users
 (

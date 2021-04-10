@@ -1,20 +1,30 @@
 package com.example.polls.model.Amazon;
 
-import com.example.polls.model.File;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Table(name = "images")
-public class Image  extends File {
+public class Image{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long imageId;
 
-    public Image() {
-        super();
-    }
+    private String url;
+
+    private String type;
 
     public Image(String url, String type) {
-        super(url, type);
+        this.url = url;
+        this.type = type;
     }
 
 

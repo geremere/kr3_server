@@ -1,6 +1,7 @@
 package com.example.polls.controller;
 
 import com.example.polls.exception.AppException;
+import com.example.polls.model.Amazon.Image;
 import com.example.polls.model.user.RegType;
 import com.example.polls.model.user.RegTypeName;
 import com.example.polls.model.user.Role;
@@ -14,6 +15,7 @@ import com.example.polls.payload.requests.LoginRequest;
 import com.example.polls.payload.requests.SignUpRequest;
 import com.example.polls.payload.response.VkAuthResponse;
 import com.example.polls.payload.response.VkResponseUser;
+import com.example.polls.repository.FileRepository;
 import com.example.polls.repository.RegTypeRepository;
 import com.example.polls.repository.RoleRepository;
 import com.example.polls.repository.UserRepository;
@@ -68,6 +70,9 @@ public class AuthController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    FileRepository fileRepository;
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Validated @RequestBody LoginRequest loginRequest) {
@@ -155,11 +160,11 @@ public class AuthController {
 //                throw new RuntimeException("User Role not set");
 //            newUser.setRoles(Collections.singleton(userRole));
 
-//            Image image = new Image(user.getPhoto_50(), "image/jpeg");
-//
-//            fileRepository.save(image);
+            Image image = new Image(user.getPhoto_50(), "image/jpeg");
 
-//            newUser.setImage(image);
+            fileRepository.save(image);
+
+            newUser.setImage(image);
 
             newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
 

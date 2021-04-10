@@ -1,7 +1,10 @@
 package com.example.polls.security;
 
+import com.example.polls.model.Amazon.Image;
 import com.example.polls.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,12 +28,16 @@ public class UserPrincipal implements UserDetails {
     @JsonIgnore
     private String password;
 
+    @Getter
+    @Setter
+    private Image image;
+
     private Collection<? extends GrantedAuthority> regTypes;
 
     private Collection<? extends GrantedAuthority> roles;
 
     public UserPrincipal(Long id, String name, String username, String email, String password,
-                         Collection<? extends GrantedAuthority> roles, Collection<? extends GrantedAuthority> regTypes) {
+                         Collection<? extends GrantedAuthority> roles, Collection<? extends GrantedAuthority> regTypes, Image image) {
         this.id = id;
         this.name = name;
         this.username = username;
@@ -38,6 +45,7 @@ public class UserPrincipal implements UserDetails {
         this.password = password;
         this.roles = roles;
         this.regTypes = regTypes;
+        this.image = image;
     }
 
     public static UserPrincipal create(User user) {
@@ -54,7 +62,8 @@ public class UserPrincipal implements UserDetails {
                 user.getEmail(),
                 user.getPassword(),
                 roles,
-                regTypes
+                regTypes,
+                user.getImage()
         );
     }
 

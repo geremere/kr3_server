@@ -7,8 +7,7 @@ public class UserProfile {
     private String username;
     private String name;
     private Instant joinedAt;
-    private Long pollCount;
-    private Long voteCount;
+
 
     public UserProfile(Long id, String username, String name, Instant joinedAt) {
         this.id = id;
@@ -39,14 +38,6 @@ public class UserProfile {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Instant getJoinedAt() {
-        return joinedAt;
-    }
-
-    public void setJoinedAt(Instant joinedAt) {
-        this.joinedAt = joinedAt;
     }
 
 }

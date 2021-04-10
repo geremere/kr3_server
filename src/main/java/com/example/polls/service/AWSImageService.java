@@ -89,7 +89,7 @@ public class AWSImageService  extends AWSClientService{
     }
 
     private String resizeAndUpload(String fileName, MultipartFile multipartFile) throws IOException {
-        String fileUrl = getEndPoint() + "/images/" + fileName;
+        String fileUrl = getEndPoint() + "images/" + fileName;
 
         BufferedImage og = ImageIO.read(multipartFile.getInputStream());
 //        BufferedImage scaledImage = Scalr.resize(og, 400, 400);
@@ -99,7 +99,7 @@ public class AWSImageService  extends AWSClientService{
 
         File output = new File(multipartFile.getOriginalFilename());
         OutputStream stream = new FileOutputStream(multipartFile.getOriginalFilename());
-        ImageIO.write(scaledImage, formatName, stream);
+        ImageIO.write(og, formatName, stream);
         stream.close();
 
         getClient().putObject(new PutObjectRequest(getBucketName(), "images/" + fileName, output)
@@ -111,7 +111,6 @@ public class AWSImageService  extends AWSClientService{
 
     public void deleteImage(Image image) {
         String key = image.getUrl().substring(getEndPoint().length() + 1);
-        fileRepository.delete(image);
         getClient().deleteObject(getBucketName(), key);
     }
 
@@ -120,7 +119,7 @@ public class AWSImageService  extends AWSClientService{
     }
 
     public Image getFile(Long fileId) {
-        return (Image) fileRepository.findByFileId(fileId);
+        return (Image) fileRepository.findByImageId(fileId);
     }
 }
 
