@@ -1,4 +1,4 @@
-package com.example.polls.repository;
+package com.example.polls.repository.chat;
 
 
 import com.example.polls.model.chat.ChatRoom;
@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
-    Optional<ChatRoom> findBySenderIdAndRecipientId(Long senderId, Long recipientId);
+    Optional<ChatRoom> findById(Long Id);
 }

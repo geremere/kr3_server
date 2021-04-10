@@ -42,7 +42,7 @@ CREATE TABLE user_regtypes
     PRIMARY KEY (user_id, regtype_id),
     CONSTRAINT fk_user_regtypes_type_id FOREIGN KEY (regtype_id) REFERENCES regtypes (id),
     CONSTRAINT fk_user_regtypes_user_id FOREIGN KEY (user_id) REFERENCES users (id)
-) ;
+);
 
 CREATE TABLE user_roles
 (
@@ -60,36 +60,66 @@ CREATE TABLE messageStatus
     PRIMARY KEY (id)
 ) ;
 
+CREATE TABLE chatRoomTypes
+(
+    id SERIAL4,
+    type varchar(60) NOT NULL,
+    PRIMARY KEY (id)
+);
 
 CREATE TABLE chatRoom
 (
     id SERIAL4,
-    chat_id varchar(255)  NOT NULL,
-    sender_id bigint NOT NULL,
-    recipient_id bigint NOT NULL,
+    title varchar,
+    type_id bigint NOT NULL,
+    image_id bigint unique,
+    CONSTRAINT fk_chat_room_type_id FOREIGN KEY (type_id) REFERENCES chatRoomTypes (id),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE chatRoom_users
+(
+    user_id bigint NOT NULL,
+    chatroom_id bigint NOT NULL,
+    PRIMARY KEY (user_id, chatroom_id),
+    CONSTRAINT fk_user_chatroom_id FOREIGN KEY (chatroom_id) REFERENCES chatRoom (id),
+    CONSTRAINT fk_chatroom_user_id FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE TABLE messageContentType
+(
+    id SERIAL4,
+    type varchar(60) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE messageContent
+(
+    id SERIAL4,
+    type_id bigint NOT NULL,
+    content varchar(1000)  NOT NULL,
+    CONSTRAINT fk_message_content_type_id FOREIGN KEY (type_id) REFERENCES messageContentType (id),
     PRIMARY KEY (id)
 );
 
 CREATE TABLE chatMessage
 (
     id SERIAL4,
-    chat_id varchar(255)  NOT NULL,
+    chat_id bigint  NOT NULL,
     sender_id bigint NOT NULL,
-    recipient_id bigint NOT NULL,
     sender_name varchar(15)  NOT NULL,
-    recipient_name varchar(15)  NOT NULL,
-    content varchar(1000) NOT NULL,
+    content_id bigint NOT NULL,
     status_id bigint NOT NULL,
     CONSTRAINT fk_chat_message_status_id FOREIGN KEY (status_id) REFERENCES messageStatus (id),
+    CONSTRAINT fk_chat_message_chat_id FOREIGN KEY (chat_id) REFERENCES chatRoom (id),
+    CONSTRAINT fk_chat_message_content_id FOREIGN KEY (content_id) REFERENCES messageContent (id),
     PRIMARY KEY (id)
 );
 
 CREATE TABLE chatNotification
 (
-    id SERIAL,
+    id SERIAL4,
     recipient_id bigint NOT NULL,
     sender_name varchar(15)  NOT NULL unique ,
     PRIMARY KEY (id)
 );
-
-

@@ -2,6 +2,7 @@ package com.example.polls.model.user;
 
 import com.example.polls.model.Amazon.Image;
 import com.example.polls.model.audit.DateAudit;
+import com.example.polls.model.chat.ChatRoom;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
@@ -9,7 +10,9 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -50,7 +53,6 @@ public class User extends DateAudit {
     @Setter
     private Image image;
 
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -62,6 +64,14 @@ public class User extends DateAudit {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "regtype_id"))
     private Set<RegType> regTypes = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "chatroom_users",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "chatroom_id"))
+    @Getter
+    @Setter
+    private List<ChatRoom> chatRooms = new ArrayList<>();
 
     public User() {
 

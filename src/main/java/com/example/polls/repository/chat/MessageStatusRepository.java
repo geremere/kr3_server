@@ -1,4 +1,4 @@
-package com.example.polls.repository;
+package com.example.polls.repository.chat;
 
 import com.example.polls.model.chat.MessageStatus;
 import com.example.polls.model.chat.MessageStatusName;

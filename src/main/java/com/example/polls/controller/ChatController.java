@@ -2,13 +2,10 @@ package com.example.polls.controller;
 
 
 
-import com.example.polls.exception.AppException;
 import com.example.polls.model.chat.ChatMessage;
 import com.example.polls.model.chat.ChatNotification;
-import com.example.polls.model.chat.MessageStatus;
-import com.example.polls.model.chat.MessageStatusName;
-import com.example.polls.payload.requests.ChatMessageRequest;
-import com.example.polls.repository.MessageStatusRepository;
+import com.example.polls.payload.requests.chat.ChatMessageRequest;
+import com.example.polls.repository.chat.MessageStatusRepository;
 import com.example.polls.service.ChatMessageService;
 import com.example.polls.service.ChatRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +16,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Optional;
 
 @Controller
 public class ChatController {
@@ -50,20 +45,19 @@ public class ChatController {
                         saved.getSenderName()));
     }
 
-    @GetMapping("/messages/{senderId}/{recipientId}/count")
-    public ResponseEntity<Long> countNewMessages(
-            @PathVariable Long senderId,
-            @PathVariable Long recipientId) {
+//    @GetMapping("/messages/{senderId}/{recipientId}/count")
+//    public ResponseEntity<Long> countNewMessages(
+//            @PathVariable Long senderId,
+//            @PathVariable Long recipientId) {
+//
+//        return ResponseEntity
+//                .ok(chatMessageService.countNewMessages(senderId, recipientId));
+//    }
 
+    @GetMapping("/messages/{chatId}")
+    public ResponseEntity<?> findChatMessages ( @PathVariable Long chatId) {
         return ResponseEntity
-                .ok(chatMessageService.countNewMessages(senderId, recipientId));
-    }
-
-    @GetMapping("/messages/{senderId}/{recipientId}")
-    public ResponseEntity<?> findChatMessages ( @PathVariable Long senderId,
-                                                @PathVariable Long recipientId) {
-        return ResponseEntity
-                .ok(chatMessageService.findChatMessages(senderId, recipientId));
+                .ok(chatMessageService.findChatMessages(chatId));
     }
 
     @GetMapping("/messages/{id}")

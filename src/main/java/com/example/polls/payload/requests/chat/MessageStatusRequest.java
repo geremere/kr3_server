@@ -1,4 +1,4 @@
-package com.example.polls.payload.requests;
+package com.example.polls.payload.requests.chat;
 
 import com.example.polls.model.chat.MessageStatusName;
 import lombok.Builder;

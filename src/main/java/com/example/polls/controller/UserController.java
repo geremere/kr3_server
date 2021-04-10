@@ -3,6 +3,7 @@ package com.example.polls.controller;
 import com.example.polls.exception.AppException;
 import com.example.polls.exception.ResourceNotFoundException;
 import com.example.polls.model.Amazon.Image;
+import com.example.polls.model.chat.ChatRoom;
 import com.example.polls.model.user.User;
 import com.example.polls.payload.*;
 import com.example.polls.payload.response.UploadFileResponse;
@@ -40,7 +41,7 @@ public class UserController {
     @GetMapping("/user/me")
     @PreAuthorize("hasRole('USER')")
     public UserSummary getCurrentUser(@CurrentUser UserPrincipal currentUser) {
-        UserSummary userSummary = new UserSummary(currentUser.getId(), currentUser.getUsername(), currentUser.getName(),currentUser.getImage());
+        UserSummary userSummary = new UserSummary(currentUser.getId(), currentUser.getUsername(), currentUser.getName(), currentUser.getImage());
         return userSummary;
     }
 
@@ -91,5 +92,14 @@ public class UserController {
         fileRepository.delete(tmp);
 
         return new UploadFileResponse(image.getUrl(), image.getType(), file.getSize());
+    }
+
+    @GetMapping("/user/chats")
+    @PreAuthorize("hasRole('USER')")
+    public List<ChatRoom> getChats(@CurrentUser UserPrincipal currentUser) {
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new AppException("User didnt find in setUserIMage"));
+        return user.getChatRooms();
+
     }
 }

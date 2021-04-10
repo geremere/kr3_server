@@ -10,34 +10,31 @@ import java.util.Date;
 @Data
 @Table(name = "chatmessage")
 @ToString
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChatMessage{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="chat_id")
-    private String chatId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    private ChatRoom chat;
 
     @Column(name="sender_id")
     private Long senderId;
 
-    @Column(name="recipient_id")
-    private Long recipientId;
-
-    @Column(name="sender_name")
+    @Column(name = "sender_name")
     private String senderName;
 
-    @Column(name="recipient_name")
-    private String recipientName;
-
-    @Column(name="content")
-    private String content;
+    @OneToOne
+    @JoinColumn(name = "content_id")
+    private MessageContent content;
 
     @ManyToOne(fetch = FetchType.EAGER)
     private MessageStatus status;
 
-//    @OneToMany(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "status_id", referencedColumnName = "id", insertable=false, updatable=false)
-//    private MessageStatus status;
 }

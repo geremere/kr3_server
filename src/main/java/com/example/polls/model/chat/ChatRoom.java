@@ -1,11 +1,12 @@
 package com.example.polls.model.chat;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.example.polls.model.Amazon.Image;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -13,17 +14,26 @@ import javax.persistence.*;
 @Builder
 @Entity
 @Table(name = "chatroom")
+@Getter
+@Setter
 public class ChatRoom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="chat_id")
-    private String chatId;
+    private String title;
 
-    @Column(name="sender_id")
-    private Long senderId;
+    @OneToOne
+    @JoinColumn(name = "type_id")
+    private ChatRoomType type;
 
-    @Column(name="recipient_id")
-    private Long recipientId;
+    @OneToOne
+    @JoinColumn(name = "image_id")
+    private Image image;
+
+    @OneToMany(mappedBy = "chat")
+    @JsonIgnore
+    @Getter
+    @Setter
+    private List<ChatMessage> chatMessages = new ArrayList<>();
 }

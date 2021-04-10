@@ -1,4 +1,4 @@
-package com.example.polls.repository;
+package com.example.polls.repository.chat;
 
 
 
@@ -12,9 +12,9 @@ import java.util.Optional;
 public interface ChatMessageRepository
         extends JpaRepository<ChatMessage, Long> {
 
-    long countBySenderIdAndRecipientIdAndStatus(
-            Long senderId, Long recipientId, MessageStatusName status);
+//    long countBySenderIdAndRecipientIdAndStatus(
+//            Long senderId, Long recipientId, MessageStatusName status);
 
-    List<ChatMessage> findByChatId(String chatId);
+    List<ChatMessage> findByChat_Id(Long chatId);
     Optional<ChatMessage> findById(Long id);
 }

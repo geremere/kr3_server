@@ -1,6 +1,5 @@
-package com.example.polls.payload.requests;
+package com.example.polls.payload.requests.chat;
 
-import com.example.polls.model.chat.MessageStatus;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -10,11 +9,11 @@ import lombok.ToString;
 @ToString
 public class ChatMessageRequest {
 
-    private String chatId;
+    private Long chatId;
     private Long senderId;
-    private Long recipientId;
     private String senderName;
-    private String recipientName;
+    private Long recipientId;
     private String content;
+    private String type;
     private MessageStatusRequest status;
 }
