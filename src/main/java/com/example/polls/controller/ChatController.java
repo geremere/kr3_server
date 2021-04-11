@@ -37,22 +37,22 @@ public class ChatController {
 
 
         ChatMessage saved = chatMessageService.save(chatMessage);
-        messagingTemplate.convertAndSendToUser(
-                chatMessage.getRecipientId().toString(),"/queue/messages",
-                new ChatNotification(
-                        saved.getId(),
-                        saved.getSenderId(),
-                        saved.getSenderName()));
+        for(Long it:chatMessage.getRecipientsId())
+            messagingTemplate.convertAndSendToUser(
+                    it.toString(),"/queue/messages",
+                    new ChatNotification(
+                            saved.getId(),
+                            saved.getSenderId(),
+                            saved.getSenderName()));
     }
 
-//    @GetMapping("/messages/{senderId}/{recipientId}/count")
-//    public ResponseEntity<Long> countNewMessages(
-//            @PathVariable Long senderId,
-//            @PathVariable Long recipientId) {
-//
-//        return ResponseEntity
-//                .ok(chatMessageService.countNewMessages(senderId, recipientId));
-//    }
+    @GetMapping("/messages/{chatId}/count")
+    public ResponseEntity<Long> countNewMessages(
+            @PathVariable Long chatId) {
+
+        return ResponseEntity
+                .ok(chatMessageService.countNewMessages(chatId));
+    }
 
     @GetMapping("/messages/{chatId}")
     public ResponseEntity<?> findChatMessages ( @PathVariable Long chatId) {
@@ -60,16 +60,16 @@ public class ChatController {
                 .ok(chatMessageService.findChatMessages(chatId));
     }
 
-    @GetMapping("/messages/{id}")
+    @GetMapping("/message/{id}")
     @ResponseBody
     public ResponseEntity<?> findMessage ( @PathVariable Long id) {
         return ResponseEntity
                 .ok(chatMessageService.findById(id));
     }
 
-    @GetMapping("/messages/status/{id}")
-    public ResponseEntity<?> getStatus ( @PathVariable Long id) {
-        return ResponseEntity
-                .ok(chatMessageService.findById(id).getStatus().getName());
-    }
+//    @GetMapping("/messages/status/{id}")
+//    public ResponseEntity<?> getStatus ( @PathVariable Long id) {
+//        return ResponseEntity
+//                .ok(chatMessageService.findById(id).getStatus().getName());
+//    }
 }

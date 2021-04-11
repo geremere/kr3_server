@@ -1,6 +1,7 @@
 package com.example.polls.model.chat;
 
 import com.example.polls.model.Amazon.Image;
+import com.example.polls.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
@@ -36,4 +37,17 @@ public class ChatRoom {
     @Getter
     @Setter
     private List<ChatMessage> chatMessages = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "chatroom_users",
+            joinColumns = @JoinColumn(name = "chatroom_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @Getter
+    @Setter
+    @JsonIgnore
+    private List<User> users = new ArrayList<>();
+
+    public String toString(){
+        return "ChatRoom: " +id;
+    }
 }

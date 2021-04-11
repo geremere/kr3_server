@@ -5,12 +5,14 @@ import com.example.polls.exception.ResourceNotFoundException;
 import com.example.polls.model.chat.*;
 import com.example.polls.model.user.User;
 import com.example.polls.payload.requests.chat.ChatMessageRequest;
+import com.example.polls.payload.response.MessageResponse;
 import com.example.polls.repository.UserRepository;
 import com.example.polls.repository.chat.*;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
@@ -21,16 +23,12 @@ public class ChatMessageService {
     private final MessageStatusRepository messageStatusRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MessageContentTypeRepository messageContentTypeRepository;
-    private final UserRepository userRepository;
     private final MessageContentRepository messageContentRepository;
 
     @Transactional
     public ChatMessage save(ChatMessageRequest chatMessage) {
-        ChatRoom chatRoom = chatRoomService.getChatRoom(chatMessage.getChatId(),"DIALOG");
-        User user = userRepository.findById(chatMessage.getRecipientId()).get();
-        user.getChatRooms().add(chatRoom);
-        User currentUser = userRepository.findById(chatMessage.getSenderId()).get();
-        currentUser.getChatRooms().add(chatRoom);
+        ChatRoom chatRoom = chatRoomService.getChatRoom(chatMessage);
+
         MessageStatus statusR = messageStatusRepository.findByName(MessageStatusName.RECEIVED).get();
         MessageContentType contentType = messageContentTypeRepository.findByType(MessageContentTypeEnum.valueOf(chatMessage.getType())).get();
         MessageContent messageContent = MessageContent
@@ -50,28 +48,31 @@ public class ChatMessageService {
         return chatMessageEntity;
     }
 
-//    public long countNewMessages(Long senderId, Long recipientId) {
-//        return repository.countBySenderIdAndRecipientIdAndStatus(
-//                senderId, recipientId, MessageStatusName.RECEIVED);
-//    }
 
-    public List<ChatMessage> findChatMessages(Long chatId) {
+    public List<MessageResponse> findChatMessages(Long chatId) {
 
         List<ChatMessage> messages = chatRoomRepository.findById(chatId).get().getChatMessages();
         final MessageStatus statusD = messageStatusRepository.findByName(MessageStatusName.DELIVERED).get();
         final MessageStatus statusR = messageStatusRepository.findByName(MessageStatusName.RECEIVED).get();
-
+        List<MessageResponse> response = new ArrayList<>();
         for (ChatMessage mess : messages) {
-            if(mess.getStatus().getName().equals(MessageStatusName.RECEIVED)) {
+            if (mess.getStatus().getName().equals(MessageStatusName.RECEIVED)) {
                 statusR.removeMessage(mess);
                 statusD.addMessage(mess);
                 chatMessageRepository.save(mess);
             }
+            response.add(MessageResponse.builder()
+                    .id(mess.getId())
+                    .content(mess.getContent().getContent())
+                    .type(mess.getContent().getType().getType())
+                    .senderId(mess.getSenderId())
+                    .senderName(mess.getSenderName())
+                    .build());
         }
-        return messages;
+        return response;
     }
 
-    public ChatMessage findById(Long id) {
+    public MessageResponse findById(Long id) {
         final MessageStatus statusR = messageStatusRepository.findByName(MessageStatusName.RECEIVED).get();
         MessageStatus statusD = messageStatusRepository.findByName(MessageStatusName.DELIVERED).get();
         return chatMessageRepository
@@ -79,11 +80,29 @@ public class ChatMessageService {
                 .map(chatMessage -> {
                     statusR.removeMessage(chatMessage);
                     statusD.addMessage(chatMessage);
-                    return chatMessageRepository.save(chatMessage);
+                    ChatMessage saved = chatMessageRepository.save(chatMessage);
+                    return MessageResponse.builder()
+                            .id(saved.getId())
+                            .content(saved.getContent().getContent())
+                            .type(saved.getContent().getType().getType())
+                            .senderId(saved.getSenderId())
+                            .senderName(saved.getSenderName())
+                            .build();
                 })
                 .orElseThrow(() ->
                         new ResourceNotFoundException("findById message", "id", id));
     }
 
+    public Long countNewMessages(Long id) {
+        ChatRoom chatRoom = chatRoomRepository.findById(id).get();
+        List<ChatMessage> messages = chatRoom.getChatMessages();
+        Long counter = new Long(0);
+        for (ChatMessage it : messages) {
+            if(MessageStatusName.RECEIVED == it.getStatus().getName())
+                counter++;
+        }
+
+        return counter;
+    }
 
 }

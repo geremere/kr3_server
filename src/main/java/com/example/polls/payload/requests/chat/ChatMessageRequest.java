@@ -12,7 +12,7 @@ public class ChatMessageRequest {
     private Long chatId;
     private Long senderId;
     private String senderName;
-    private Long recipientId;
+    private Long[] recipientsId;
     private String content;
     private String type;
     private MessageStatusRequest status;

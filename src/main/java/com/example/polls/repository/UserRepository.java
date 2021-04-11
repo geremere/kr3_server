@@ -1,5 +1,6 @@
 package com.example.polls.repository;
 
+import com.example.polls.model.chat.ChatRoom;
 import com.example.polls.model.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -25,4 +26,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAll();
 
     Optional<User> findById(Long id);
+
+    Optional<List<User>> findByNameContaining(String substr);
+
+    Optional<List<User>> findByNameStartingWith(String substr);
 }

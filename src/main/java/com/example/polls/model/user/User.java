@@ -3,6 +3,7 @@ package com.example.polls.model.user;
 import com.example.polls.model.Amazon.Image;
 import com.example.polls.model.audit.DateAudit;
 import com.example.polls.model.chat.ChatRoom;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
@@ -71,6 +72,7 @@ public class User extends DateAudit {
             inverseJoinColumns = @JoinColumn(name = "chatroom_id"))
     @Getter
     @Setter
+    @JsonIgnore
     private List<ChatRoom> chatRooms = new ArrayList<>();
 
     public User() {
