@@ -123,3 +123,78 @@ CREATE TABLE chatNotification
     sender_name varchar(15)  NOT NULL unique ,
     PRIMARY KEY (id)
 );
+
+CREATE TABLE Projects
+(
+    id SERIAL4,
+    image_id bigint  NOT NULL,
+    title varchar NOT NULL,
+    description varchar,
+    CONSTRAINT fk_project_image_id FOREIGN KEY (image_id) REFERENCES images (image_id),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE Comments
+(
+    id SERIAL4,
+    project_id bigint  NOT NULL,
+    content varchar NOT NULL,
+    CONSTRAINT fk_comment_project_id FOREIGN KEY (project_id) REFERENCES Projects(id),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE RiskTypes
+(
+    id SERIAL4,
+    type varchar(60) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+
+CREATE TABLE RiskStates
+(
+    id SERIAL4,
+    priority int NOT NULL,
+    state varchar NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE Risks
+(
+    id SERIAL4,
+    project_id bigint NOT NULL,
+    state_id bigint NOT NULL,
+    CONSTRAINT fk_risk_project_id FOREIGN KEY (project_id) REFERENCES Projects (id),
+    CONSTRAINT fk_risk_state_id FOREIGN KEY (state_id) REFERENCES RiskStates (id),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE risks_users
+(
+    user_id bigint NOT NULL,
+    risk_id bigint NOT NULL,
+    PRIMARY KEY (user_id, risk_id),
+    CONSTRAINT fk_user_risk_id FOREIGN KEY (risk_id) REFERENCES Risks (id),
+    CONSTRAINT fk_risk_user_id FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE TABLE riskTypes_risks
+(
+    risk_id bigint NOT NULL,
+    type_id bigint NOT NULL,
+    PRIMARY KEY (risk_id, type_id),
+    CONSTRAINT fk_risktype_risk_id FOREIGN KEY (risk_id) REFERENCES Risks (id),
+    CONSTRAINT fk_risk_risktype_id FOREIGN KEY (type_id) REFERENCES RiskTypes (id)
+);
+
+CREATE TABLE riskTypes_users
+(
+    user_id bigint NOT NULL,
+    risktype_id bigint NOT NULL,
+    PRIMARY KEY (user_id, risktype_id),
+    CONSTRAINT fk_risktype_user_id FOREIGN KEY (user_id) REFERENCES users (id),
+    CONSTRAINT fk_user_risktype_id FOREIGN KEY (risktype_id) REFERENCES RiskTypes (id)
+);
+
+
+

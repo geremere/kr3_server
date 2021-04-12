@@ -34,16 +34,12 @@ public class ChatRoom {
 
     @OneToMany(mappedBy = "chat")
     @JsonIgnore
-    @Getter
-    @Setter
     private List<ChatMessage> chatMessages = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "chatroom_users",
             joinColumns = @JoinColumn(name = "chatroom_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-    @Getter
-    @Setter
     @JsonIgnore
     private List<User> users = new ArrayList<>();
 
