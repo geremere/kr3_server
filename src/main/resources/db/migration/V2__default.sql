@@ -16,5 +16,5 @@ INSERT INTO messagecontenttype(type) VALUES('TEXT') on conflict do nothing ;
 INSERT INTO messagecontenttype(type) VALUES('IMAGE') on conflict  do nothing ;
 
 --ChatRoomType
-INSERT INTO chatroomtype(type) VALUES('DIALOG') on conflict do nothing ;
-INSERT INTO chatroomtype(type) VALUES('CHAT') on conflict  do nothing ;
+INSERT INTO chatroomtypes(type) VALUES('DIALOG') on conflict do nothing ;
+INSERT INTO chatroomtypes(type) VALUES('CHAT') on conflict  do nothing ;

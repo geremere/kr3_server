@@ -29,22 +29,26 @@ public class ChatRoomService {
     public ChatRoom getChatRoom(ChatMessageRequest chatMessage) {
 //        код будет работать тут только для диалогов, чаты для более чем одного будут создаваться отдельно
         if (chatMessage.getChatId() == null) {
-            ChatRoomType chatRoomType = chatRoomTypeRepository.findChatRoomTypeByType(ChatRoomTypeEnum.valueOf("DIALOG")).get();
-            ChatRoom chatRoom = ChatRoom
-                    .builder()
-                    .title("")
-                    .type(chatRoomType)
-                    .build();
-            chatRoomRepository.save(chatRoom);
-
-            User user = userRepository.findById(chatMessage.getRecipientsId()[0]).get();
-            user.getChatRooms().add(chatRoom);
-            if(!chatMessage.getRecipientsId()[0].equals(chatMessage.getSenderId())) {
-                User currentUser = userRepository.findById(chatMessage.getSenderId()).get();
-                currentUser.getChatRooms().add(chatRoom);
-            }
-            return chatRoom;
+            return createChatRoom(chatMessage.getRecipientsId(),chatMessage.getSenderId(),"DIALOG");
         }
         return chatRoomRepository.findById(chatMessage.getChatId()).get();
+    }
+
+    public ChatRoom createChatRoom(Long[] recipientsId, Long senderId, String type){
+        ChatRoomType chatRoomType = chatRoomTypeRepository.findChatRoomTypeByType(ChatRoomTypeEnum.valueOf(type)).get();
+        ChatRoom chatRoom = ChatRoom
+                .builder()
+                .title("")
+                .type(chatRoomType)
+                .build();
+        chatRoomRepository.save(chatRoom);
+
+        User user = userRepository.findById(recipientsId[0]).get();
+        user.getChatRooms().add(chatRoom);
+        if(!recipientsId[0].equals(senderId)) {
+            User currentUser = userRepository.findById(senderId).get();
+            currentUser.getChatRooms().add(chatRoom);
+        }
+        return chatRoom;
     }
 }

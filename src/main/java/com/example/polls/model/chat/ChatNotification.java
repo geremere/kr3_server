@@ -1,23 +1,17 @@
 package com.example.polls.model.chat;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Setter
 @Builder
-@Entity
-@Table(name = "chatnotification")
 public class ChatNotification {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+
+    private Long Id;
     private Long senderId;
     private String senderName;
+    private Long chatId;
 }
