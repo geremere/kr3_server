@@ -20,12 +20,15 @@ public class RiskState {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long priority;
+    private Long priority = new Long(1);
+
+    private String description = "";
+
 
     @Enumerated(EnumType.STRING)
     @NaturalId
     @Column(length = 60)
-    private RiskStateEnum state;
+    private RiskStateEnum state = RiskStateEnum.BEGIN;
 
 //    @OneToOne(fetch = FetchType.EAGER)
 //    @Column(name = "risk_id")

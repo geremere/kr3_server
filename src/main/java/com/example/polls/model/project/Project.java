@@ -1,6 +1,7 @@
 package com.example.polls.model.project;
 
 import com.example.polls.model.Amazon.Image;
+import com.example.polls.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
@@ -24,7 +25,7 @@ public class Project {
 
     private String title;
 
-    private String Description;
+    private String description;
 
     @OneToOne
     @JoinColumn(name = "image_id")
@@ -37,6 +38,13 @@ public class Project {
     @OneToMany(mappedBy = "project")
     @JsonIgnore
     private List<Comment> feed = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(name = "projects_users",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "project_id"))
+    @JsonIgnore
+    private List<User> users = new ArrayList<>();
 
     public void addRisk(Risk risk) {
         risks.add(risk);

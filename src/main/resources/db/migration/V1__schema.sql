@@ -127,7 +127,7 @@ CREATE TABLE chatNotification
 CREATE TABLE Projects
 (
     id SERIAL4,
-    image_id bigint  NOT NULL,
+    image_id bigint,
     title varchar NOT NULL,
     description varchar,
     CONSTRAINT fk_project_image_id FOREIGN KEY (image_id) REFERENCES images (image_id),
@@ -164,6 +164,7 @@ CREATE TABLE Risks
     id SERIAL4,
     project_id bigint NOT NULL,
     state_id bigint NOT NULL,
+    description varchar,
     CONSTRAINT fk_risk_project_id FOREIGN KEY (project_id) REFERENCES Projects (id),
     CONSTRAINT fk_risk_state_id FOREIGN KEY (state_id) REFERENCES RiskStates (id),
     PRIMARY KEY (id)
@@ -194,6 +195,15 @@ CREATE TABLE riskTypes_users
     PRIMARY KEY (user_id, risktype_id),
     CONSTRAINT fk_risktype_user_id FOREIGN KEY (user_id) REFERENCES users (id),
     CONSTRAINT fk_user_risktype_id FOREIGN KEY (risktype_id) REFERENCES RiskTypes (id)
+);
+
+CREATE TABLE Projects_users
+(
+    user_id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    PRIMARY KEY (user_id, project_id),
+    CONSTRAINT fk_project_user_id FOREIGN KEY (user_id) REFERENCES users (id),
+    CONSTRAINT fk_user_project_id FOREIGN KEY (project_id) REFERENCES Projects (id)
 );
 
 
