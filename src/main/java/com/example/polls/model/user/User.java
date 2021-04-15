@@ -3,7 +3,8 @@ package com.example.polls.model.user;
 import com.example.polls.model.Amazon.Image;
 import com.example.polls.model.audit.DateAudit;
 import com.example.polls.model.chat.ChatRoom;
-import com.example.polls.model.project.Risk;
+import com.example.polls.model.project.Project;
+import com.example.polls.model.project.ProjectRisk;
 import com.example.polls.model.project.RiskType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
@@ -62,12 +63,14 @@ public class User extends DateAudit {
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JsonIgnore
     private Set<Role> roles = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_regtypes",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "regtype_id"))
+    @JsonIgnore
     private Set<RegType> regTypes = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -77,19 +80,26 @@ public class User extends DateAudit {
     @JsonIgnore
     private List<ChatRoom> chatRooms = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "risktypes_users",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "risktype_id"))
     @JsonIgnore
     private List<RiskType> speciality = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "risks_users",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "risk_id"))
     @JsonIgnore
-    private List<Risk> responsibility = new ArrayList<>();
+    private List<ProjectRisk> responsibility = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "projects_users",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "project_id"))
+    @JsonIgnore
+    private List<Project> projects = new ArrayList<>();
 
 
     public User(String name, String username, String email, String password) {

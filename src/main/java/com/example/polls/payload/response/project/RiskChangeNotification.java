@@ -11,6 +11,6 @@ import java.util.List;
 @Setter
 @Builder
 public class RiskChangeNotification {
-    private Long Id;
+    private String riskName;
     private String changerName;
 }

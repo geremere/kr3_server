@@ -1,6 +1,6 @@
 package com.example.polls.payload.requests.project;
 
-import com.example.polls.model.user.User;
+import com.example.polls.payload.UserSummary;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 public class ProjectRequest {
 
-    private List<User> users = new ArrayList<>();
+    private List<UserSummary> users;
     private String title;
     private String description;
     private Long image_id;

@@ -1,5 +1,5 @@
 package com.example.polls.model.project;
 
 public enum RiskStateEnum {
-    BEGIN,END
+    BEGIN,END,IN_PROCESS
 }

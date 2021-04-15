@@ -33,26 +33,26 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     @JsonIgnore
-    private Set<Risk> risks = new HashSet<>();
+    private Set<ProjectRisk> projectRisks = new HashSet<>();
 
     @OneToMany(mappedBy = "project")
     @JsonIgnore
     private List<Comment> feed = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "projects_users",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "project_id"))
+            joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
     @JsonIgnore
     private List<User> users = new ArrayList<>();
 
-    public void addRisk(Risk risk) {
-        risks.add(risk);
-        risk.setProject(this);
+    public void addRisk(ProjectRisk projectRisk) {
+        projectRisks.add(projectRisk);
+        projectRisk.setProject(this);
     }
 
-    public void removeRisk(Risk risk) {
-        risks.remove(risk);
+    public void removeRisk(ProjectRisk projectRisk) {
+        projectRisks.remove(projectRisk);
     }
 
     public void addComment(Comment comment) {

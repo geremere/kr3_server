@@ -11,7 +11,11 @@ import com.example.polls.repository.chat.ChatRoomRepository;
 import com.example.polls.repository.chat.ChatRoomTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,19 +26,18 @@ public class ChatRoomService {
     @Autowired
     private ChatRoomTypeRepository chatRoomTypeRepository;
     @Autowired
-    private  UserRepository userRepository;
-
+    private UserRepository userRepository;
 
 
     public ChatRoom getChatRoom(ChatMessageRequest chatMessage) {
 //        код будет работать тут только для диалогов, чаты для более чем одного будут создаваться отдельно
         if (chatMessage.getChatId() == null) {
-            return createChatRoom(chatMessage.getRecipientsId(),chatMessage.getSenderId(),"DIALOG");
+            return createChatRoom(chatMessage.getRecipientsId(), chatMessage.getSenderId(), "DIALOG");
         }
         return chatRoomRepository.findById(chatMessage.getChatId()).get();
     }
 
-    public ChatRoom createChatRoom(Long[] recipientsId, Long senderId, String type){
+    public ChatRoom createChatRoom(Long[] recipientsId, Long senderId, String type) {
         ChatRoomType chatRoomType = chatRoomTypeRepository.findChatRoomTypeByType(ChatRoomTypeEnum.valueOf(type)).get();
         ChatRoom chatRoom = ChatRoom
                 .builder()
@@ -45,10 +48,36 @@ public class ChatRoomService {
 
         User user = userRepository.findById(recipientsId[0]).get();
         user.getChatRooms().add(chatRoom);
-        if(!recipientsId[0].equals(senderId)) {
+        if (!recipientsId[0].equals(senderId)) {
             User currentUser = userRepository.findById(senderId).get();
             currentUser.getChatRooms().add(chatRoom);
         }
+        return chatRoom;
+    }
+
+    @Transactional
+    public ChatRoom createGroupChatRoom(Long[] recipientsId, Long senderId, String type, String chatName) {
+        ChatRoomType chatRoomType = chatRoomTypeRepository.findChatRoomTypeByType(ChatRoomTypeEnum.valueOf(type)).get();
+        List<User> users = new ArrayList<>();
+        for (Long i : recipientsId) {
+            if (i.longValue()!=senderId.longValue())
+                users.add(userRepository.findById(i).get());
+        }
+        users.add(userRepository.findById(senderId).get());
+        ChatRoom chatRoom = ChatRoom
+                .builder()
+                .title(chatName)
+                .users(users)
+                .type(chatRoomType)
+                .build();
+        chatRoomRepository.save(chatRoom);
+//
+//        User user = userRepository.findById(recipientsId[0]).get();
+//        user.getChatRooms().add(chatRoom);
+//        if(!recipientsId[0].equals(senderId)) {
+//            User currentUser = userRepository.findById(senderId).get();
+//            currentUser.getChatRooms().add(chatRoom);
+//        }
         return chatRoom;
     }
 }

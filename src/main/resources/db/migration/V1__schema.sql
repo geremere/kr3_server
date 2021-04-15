@@ -156,6 +156,15 @@ CREATE TABLE RiskStates
     id SERIAL4,
     priority int NOT NULL,
     state varchar NOT NULL,
+    description varchar NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE RiskDB
+(
+    id SERIAL4,
+    name varchar NOT NULL,
+    description varchar,
     PRIMARY KEY (id)
 );
 
@@ -164,11 +173,15 @@ CREATE TABLE Risks
     id SERIAL4,
     project_id bigint NOT NULL,
     state_id bigint NOT NULL,
+    risk_id bigint NOT NULL,
     description varchar,
+    CONSTRAINT fk_risk_riskdb_id FOREIGN KEY (risk_id) REFERENCES RiskDB (id),
     CONSTRAINT fk_risk_project_id FOREIGN KEY (project_id) REFERENCES Projects (id),
     CONSTRAINT fk_risk_state_id FOREIGN KEY (state_id) REFERENCES RiskStates (id),
     PRIMARY KEY (id)
 );
+
+
 
 CREATE TABLE risks_users
 (
@@ -179,14 +192,16 @@ CREATE TABLE risks_users
     CONSTRAINT fk_risk_user_id FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-CREATE TABLE riskTypes_risks
+CREATE TABLE types_risks
 (
     risk_id bigint NOT NULL,
     type_id bigint NOT NULL,
     PRIMARY KEY (risk_id, type_id),
-    CONSTRAINT fk_risktype_risk_id FOREIGN KEY (risk_id) REFERENCES Risks (id),
+    CONSTRAINT fk_risktype_risk_id FOREIGN KEY (risk_id) REFERENCES RiskDB (id),
     CONSTRAINT fk_risk_risktype_id FOREIGN KEY (type_id) REFERENCES RiskTypes (id)
 );
+
+
 
 CREATE TABLE riskTypes_users
 (

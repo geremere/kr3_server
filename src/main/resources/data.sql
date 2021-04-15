@@ -18,3 +18,10 @@ INSERT INTO messagecontenttype(type) VALUES('IMAGE') on conflict  do nothing ;
 --ChatRoomType
 INSERT INTO chatroomtypes(type) VALUES('DIALOG') on conflict do nothing ;
 INSERT INTO chatroomtypes(type) VALUES('CHAT') on conflict  do nothing ;
+
+--RiskType
+INSERT INTO risktypes(type) VALUES('ONE') on conflict do nothing ;
+INSERT INTO risktypes(type) VALUES('TWO') on conflict do nothing ;
+INSERT INTO risktypes(type) VALUES('THREE') on conflict do nothing ;
+INSERT INTO risktypes(type) VALUES('FOUR') on conflict do nothing ;
+INSERT INTO risktypes(type) VALUES('FIVE') on conflict do nothing ;

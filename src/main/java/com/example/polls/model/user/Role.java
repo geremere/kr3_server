@@ -39,4 +39,8 @@ public class Role {
         this.name = name;
     }
 
+    public String toString(){
+        return "Role" + getName();
+    }
+
 }

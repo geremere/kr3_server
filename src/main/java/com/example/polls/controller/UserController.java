@@ -5,19 +5,24 @@ import com.example.polls.exception.ResourceNotFoundException;
 import com.example.polls.model.Amazon.Image;
 import com.example.polls.model.chat.ChatRoom;
 import com.example.polls.model.chat.ChatRoomTypeEnum;
+import com.example.polls.model.project.RiskType;
 import com.example.polls.model.user.User;
 import com.example.polls.payload.*;
+import com.example.polls.payload.requests.chat.ChatRoomCreateRequest;
 import com.example.polls.payload.response.ChatRoomResponse;
 import com.example.polls.payload.response.UploadFileResponse;
 import com.example.polls.repository.FileRepository;
 import com.example.polls.repository.UserRepository;
 import com.example.polls.repository.chat.ChatRoomRepository;
+import com.example.polls.repository.project.RiskTypeRepository;
 import com.example.polls.security.UserPrincipal;
 import com.example.polls.security.CurrentUser;
 import com.example.polls.service.AWSImageService;
+import com.example.polls.service.ChatRoomService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,6 +47,10 @@ public class UserController {
 
     @Autowired
     private ChatRoomRepository chatRoomRepository;
+    @Autowired
+    private ChatRoomService chatRoomService;
+    @Autowired
+    private RiskTypeRepository riskTypeRepository;
 
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -160,4 +169,45 @@ public class UserController {
                 .build())
                 .collect(Collectors.toList());
     }
+
+    @GetMapping("/user/{userId}")
+    public UserSummary getUserById(@PathVariable Long userId) {
+        User user = userRepository.findById(userId).get();
+        return UserSummary.builder()
+                .id(userId)
+                .name(user.getName())
+                .username(user.getUsername())
+                .image(user.getImage())
+                .build();
+    }
+
+    @PostMapping("/chatroom/create")
+    public ResponseEntity<ChatRoomResponse> createChatRoom(@RequestBody ChatRoomCreateRequest chatRoomCreateRequest){
+        ChatRoom chatRoom =  chatRoomService.createGroupChatRoom(chatRoomCreateRequest.getRecipientsId(),chatRoomCreateRequest.getSenderId()
+                ,"CHAT",chatRoomCreateRequest.getChatName());
+        return ResponseEntity.ok(ChatRoomResponse.builder()
+                .id(chatRoom.getId())
+                .image(chatRoom.getImage())
+                .title(chatRoom.getTitle())
+                .usersId(chatRoom.getUsers().stream().map(User::getId).collect(Collectors.toList()))
+                .build());
+    }
+
+    @GetMapping("/user/me/get/types")
+    public ResponseEntity<List<RiskType>> createChatRoom(@CurrentUser UserPrincipal currentUser){
+        User user = userRepository.findById(currentUser.getId()).get();
+
+        return ResponseEntity.ok(user.getSpeciality());
+    }
+
+    @PostMapping("/user/set/types")
+    public ResponseEntity<?> createChatRoom(@CurrentUser UserPrincipal currentUser,
+            @RequestBody List<Long> riskTypes){
+        User user = userRepository.findById(currentUser.getId()).get();
+        user.setSpeciality(riskTypes.stream().map(riskTypeRepository::findById).collect(Collectors.toList()));
+        userRepository.save(user);
+        return ResponseEntity.ok("success");
+    }
+
+
 }
