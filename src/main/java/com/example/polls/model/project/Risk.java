@@ -29,6 +29,8 @@ public class Risk {
             joinColumns = @JoinColumn(name = "risk_id"),
             inverseJoinColumns = @JoinColumn(name = "type_id"))
     private List<RiskType> types = new ArrayList<>();
+    @Column(length = 2000)
     String name;
+    @Column(length = 2000)
     String description;
 }
