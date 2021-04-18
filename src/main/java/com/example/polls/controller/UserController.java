@@ -194,14 +194,14 @@ public class UserController {
     }
 
     @GetMapping("/user/me/get/types")
-    public ResponseEntity<List<RiskType>> createChatRoom(@CurrentUser UserPrincipal currentUser){
+    public ResponseEntity<List<RiskType>> getTypes(@CurrentUser UserPrincipal currentUser){
         User user = userRepository.findById(currentUser.getId()).get();
 
         return ResponseEntity.ok(user.getSpeciality());
     }
 
     @PostMapping("/user/set/types")
-    public ResponseEntity<?> createChatRoom(@CurrentUser UserPrincipal currentUser,
+    public ResponseEntity<?> setTypes(@CurrentUser UserPrincipal currentUser,
             @RequestBody List<Long> riskTypes){
         User user = userRepository.findById(currentUser.getId()).get();
         user.setSpeciality(riskTypes.stream().map(riskTypeRepository::findById).collect(Collectors.toList()));

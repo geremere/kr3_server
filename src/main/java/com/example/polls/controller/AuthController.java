@@ -144,7 +144,7 @@ public class AuthController {
 //                        HttpStatus.BAD_REQUEST);
 //            }
 
-            User newUser = new User(user.getFirst_name(), user.getDomain(), (accessTokenVkResponse.getEmail() == "" || accessTokenVkResponse.getEmail() == null) ? "default@mail.ru" : accessTokenVkResponse.getEmail(),
+            User newUser = new User(user.getLast_name()+ " " +user.getFirst_name() , user.getDomain(), (accessTokenVkResponse.getEmail() == "" || accessTokenVkResponse.getEmail() == null) ? "default@mail.ru" : accessTokenVkResponse.getEmail(),
                     user.getDomain());
 
             Role userRole = roleRepository.findByName(TypeName.ROLE_USER).
