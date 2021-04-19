@@ -3,14 +3,15 @@ package com.example.polls.controller;
 import com.example.polls.model.Amazon.Image;
 import com.example.polls.model.project.Project;
 import com.example.polls.model.project.Risk;
-import com.example.polls.model.project.RiskType;
 import com.example.polls.payload.UserSummary;
 import com.example.polls.payload.requests.project.ProjectRequest;
+import com.example.polls.payload.requests.project.SetUsersRequest;
 import com.example.polls.payload.response.UploadFileResponse;
 import com.example.polls.payload.response.project.ProjectResponse;
 import com.example.polls.payload.response.project.RiskResponse;
 import com.example.polls.payload.response.project.RiskTypeResponse;
 import com.example.polls.repository.FileRepository;
+import com.example.polls.repository.UserRepository;
 import com.example.polls.repository.project.ProjectRepository;
 import com.example.polls.security.CurrentUser;
 import com.example.polls.security.UserPrincipal;
@@ -37,6 +38,7 @@ public class ProjectController {
     private final ProjectService projectService;
     private final AWSImageService imageService;
     private final FileRepository fileRepository;
+    private final UserRepository userRepository;
 
     @PostMapping("/project/create")
     public ResponseEntity<ProjectResponse> createProject(@RequestBody ProjectRequest projectRequest) {
@@ -95,6 +97,14 @@ public class ProjectController {
                                                                @PathVariable Long riskId) {
         return ResponseEntity
                 .ok(projectService.getAvailableUser(prId, riskId));
+    }
+
+    @PostMapping("/project/set/users")
+    public ResponseEntity<?> setUsers(@RequestBody SetUsersRequest setUsersRequest){
+        Project project = projectRepository.findById(setUsersRequest.getProjectId()).get();
+        project.setUsers(userRepository.findByIdIn(setUsersRequest.getUsers()));
+        projectRepository.save(project);
+        return ResponseEntity.ok("success");
     }
 
     //    @GetMapping("/project/users/{prId}/{riskId}")
