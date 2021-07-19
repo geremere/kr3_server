@@ -72,14 +72,14 @@ public class ProjectController {
         projectService.addUser(prId, userId);
     }
 
-    @PostMapping("/project/setimage")
-    public UploadFileResponse setUserImage(@RequestParam("file") MultipartFile file) throws IOException {
-        Image image = imageService.store(file);
-
-        fileRepository.save(image);
-
-        return UploadFileResponse.builder().id(image.getImageId()).fileName(image.getUrl()).build();
-    }
+//    @PostMapping("/project/setimage")
+//    public UploadFileResponse setUserImage(@RequestParam("file") MultipartFile file) throws IOException {
+//        Image image = imageService.store(file);
+//
+//        fileRepository.save(image);
+//
+//        return UploadFileResponse.builder().id(image.getImageId()).fileName(image.getUrl()).build();
+//    }
 
     @GetMapping("/risk/all/types")
     public ResponseEntity<List<RiskTypeResponse>> getAllTypes() {

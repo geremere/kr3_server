@@ -65,7 +65,15 @@ public class UserController {
     @GetMapping("/users/all")
     @PreAuthorize("hasRole('USER')")
     public List<UserSummary> getAllUser(@CurrentUser UserPrincipal currentUser) {
-        List<UserSummary> allUsers = userRepository.findAll().stream().map(user -> new UserSummary(user.getId(), user.getUsername(), user.getName(), user.getImage())).collect(Collectors.toList());
+        List<UserSummary> allUsers = userRepository.findAll().stream()
+                .filter(user -> user.getId() != currentUser.getId())
+                .map(user -> UserSummary.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .name(user.getName())
+                        .image(user.getImage())
+                        .build())
+                .collect(Collectors.toList());
         return allUsers;
     }
 
@@ -148,8 +156,24 @@ public class UserController {
 
     }
 
-    @GetMapping("/search/{substr}")
-    public List<UserSummary> Search(@PathVariable String substr) {
+    @GetMapping(value={"/search/","/search/{substr}"})
+    @PreAuthorize("hasRole('USER')")
+    public List<UserSummary> Search(@PathVariable(required = false) String substr,
+                                    @CurrentUser UserPrincipal currentUser) {
+
+        if (substr == null){
+            List<UserSummary> allUsers = userRepository.findAll().stream()
+                    .filter(user -> user.getId() != currentUser.getId())
+                    .map(user -> UserSummary.builder()
+                            .id(user.getId())
+                            .username(user.getUsername())
+                            .name(user.getName())
+                            .image(user.getImage())
+                            .build())
+                    .collect(Collectors.toList());
+            return allUsers;
+        }
+
         Optional<List<User>> opt = userRepository.findByNameContaining(substr);
         List<User> resultC = new ArrayList<>();
         if (opt.isPresent())
@@ -182,9 +206,9 @@ public class UserController {
     }
 
     @PostMapping("/chatroom/create")
-    public ResponseEntity<ChatRoomResponse> createChatRoom(@RequestBody ChatRoomCreateRequest chatRoomCreateRequest){
-        ChatRoom chatRoom =  chatRoomService.createGroupChatRoom(chatRoomCreateRequest.getRecipientsId(),chatRoomCreateRequest.getSenderId()
-                ,"CHAT",chatRoomCreateRequest.getChatName());
+    public ResponseEntity<ChatRoomResponse> createChatRoom(@RequestBody ChatRoomCreateRequest chatRoomCreateRequest) {
+        ChatRoom chatRoom = chatRoomService.createGroupChatRoom(chatRoomCreateRequest.getRecipientsId(), chatRoomCreateRequest.getSenderId()
+                , "CHAT", chatRoomCreateRequest.getChatName());
         return ResponseEntity.ok(ChatRoomResponse.builder()
                 .id(chatRoom.getId())
                 .image(chatRoom.getImage())
@@ -194,7 +218,7 @@ public class UserController {
     }
 
     @GetMapping("/user/me/get/types")
-    public ResponseEntity<List<RiskType>> getTypes(@CurrentUser UserPrincipal currentUser){
+    public ResponseEntity<List<RiskType>> getTypes(@CurrentUser UserPrincipal currentUser) {
         User user = userRepository.findById(currentUser.getId()).get();
 
         return ResponseEntity.ok(user.getSpeciality());
@@ -202,7 +226,7 @@ public class UserController {
 
     @PostMapping("/user/set/types")
     public ResponseEntity<?> setTypes(@CurrentUser UserPrincipal currentUser,
-            @RequestBody List<Long> riskTypes){
+                                      @RequestBody List<Long> riskTypes) {
         User user = userRepository.findById(currentUser.getId()).get();
         user.setSpeciality(riskTypes.stream().map(riskTypeRepository::findById).collect(Collectors.toList()));
         userRepository.save(user);
