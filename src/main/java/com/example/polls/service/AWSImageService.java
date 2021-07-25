@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
+import javax.transaction.Transactional;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AWSImageService  extends AWSClientService{
 
     private final FileRepository fileRepository;
@@ -29,6 +31,7 @@ public class AWSImageService  extends AWSClientService{
         String extension = multipartFile.getOriginalFilename()
                 .substring(multipartFile.getOriginalFilename().lastIndexOf('.')).toLowerCase();
 
+        System.out.println(ImageIO.read(multipartFile.getInputStream()));
         if (ImageIO.read(multipartFile.getInputStream()) == null)
             throw new IOException("Can't read file");
 
@@ -110,6 +113,7 @@ public class AWSImageService  extends AWSClientService{
     public void deleteImage(Image image) {
         String key = image.getUrl().substring(getEndPoint().length() + 1);
         getClient().deleteObject(getBucketName(), key);
+        fileRepository.delete(image);
     }
 
     private String generateFileName(String originalName) {
@@ -117,7 +121,7 @@ public class AWSImageService  extends AWSClientService{
     }
 
     public Image getFile(Long fileId) {
-        return (Image) fileRepository.findByImageId(fileId);
+        return fileRepository.findByImageId(fileId);
     }
 }
 

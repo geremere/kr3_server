@@ -15,4 +15,5 @@ public class ProjectRequest {
     private String title;
     private String description;
     private Long image_id;
+    private Long owner_id;
 }

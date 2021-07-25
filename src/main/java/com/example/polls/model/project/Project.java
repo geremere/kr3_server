@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +27,11 @@ public class Project {
     private String title;
 
     private String description;
+
+    @NotNull
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User owner;
 
     @OneToOne
     @JoinColumn(name = "image_id")

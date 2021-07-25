@@ -26,6 +26,4 @@ public class Image{
         this.url = url;
         this.type = type;
     }
-
-
 }

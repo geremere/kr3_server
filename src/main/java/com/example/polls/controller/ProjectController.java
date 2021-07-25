@@ -41,12 +41,12 @@ public class ProjectController {
     private final UserRepository userRepository;
 
     @PostMapping("/project/create")
-    public ResponseEntity<ProjectResponse> createProject(@RequestBody ProjectRequest projectRequest) {
-//        ProjectRequest projectRequest =  new ProjectRequest();
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<ProjectResponse> createProject(@RequestBody ProjectRequest projectRequest) throws IOException {
         return ResponseEntity.ok(projectService.createProject(projectRequest));
     }
 
-    @GetMapping("project/all")
+    @GetMapping("project")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<ProjectResponse>> addAllProjects(@CurrentUser UserPrincipal currentUser) {
         return ResponseEntity.ok(projectService.getAllProjects(currentUser.getId()));
@@ -100,7 +100,7 @@ public class ProjectController {
     }
 
     @PostMapping("/project/set/users")
-    public ResponseEntity<?> setUsers(@RequestBody SetUsersRequest setUsersRequest){
+    public ResponseEntity<?> setUsers(@RequestBody SetUsersRequest setUsersRequest) {
         Project project = projectRepository.findById(setUsersRequest.getProjectId()).get();
         project.setUsers(userRepository.findByIdIn(setUsersRequest.getUsers()));
         projectRepository.save(project);

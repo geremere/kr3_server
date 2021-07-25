@@ -27,6 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -103,6 +104,7 @@ public class UserController {
 
     @PostMapping("/user/me/image")
     @PreAuthorize("hasRole('USER')")
+    @Transactional
     public UploadFileResponse setUserImage(@CurrentUser UserPrincipal currentUser,
                                            @RequestParam("file") MultipartFile file) throws IOException {
         User user = userRepository.findById(currentUser.getId())
@@ -110,13 +112,11 @@ public class UserController {
         if (user.getImage() != null)
             imageService.deleteImage(user.getImage());
         Image image = imageService.store(file);
-        Image tmp = user.getImage();
         user.setImage(image);
 
         userRepository.save(user);
-        fileRepository.delete(tmp);
 
-        return new UploadFileResponse(image.getUrl(), image.getType(), file.getSize());
+        return new UploadFileResponse(image.getUrl(), image.getType(), file.getSize(), image.getImageId());
     }
 
     @GetMapping("/user/chats")

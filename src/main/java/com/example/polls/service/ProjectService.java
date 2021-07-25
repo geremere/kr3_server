@@ -1,5 +1,6 @@
 package com.example.polls.service;
 
+import com.example.polls.model.Amazon.Image;
 import com.example.polls.model.project.Project;
 import com.example.polls.model.project.ProjectRisk;
 import com.example.polls.model.project.Risk;
@@ -17,7 +18,9 @@ import com.example.polls.repository.project.RiskTypeRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,23 +29,24 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
-    private final ProjectRiskRepository projectRiskRepository;
     private final UserService userService;
     private final UserRepository userRepository;
-    private final FileRepository fileRepository;
     private final RiskDBRepository riskDBRepository;
-    private final RiskTypeRepository riskTypeRepository;
+    private final AWSImageService imageService;
 
 
     @Transactional
-    public ProjectResponse createProject(ProjectRequest projectRequest) {
-        List<User> users = projectRequest.getUsers().stream().map(user -> userRepository.findById(user.getId()).get()).collect(Collectors.toList());
+    public ProjectResponse createProject(ProjectRequest projectRequest) throws IOException {
+        List<User> users = projectRequest.getUsers().stream().map(user -> userService.getById(user.getId())).collect(Collectors.toList());
+        User owner = userService.getById(projectRequest.getOwner_id());
+        Image image = imageService.getFile(projectRequest.getImage_id());
         Project project = projectRepository.save(Project.builder()
-                .image(projectRequest.getImage_id() != null ? fileRepository.findByImageId(projectRequest.getImage_id()) : null)
+                .image(image)
                 .title(projectRequest.getTitle())
                 .description(projectRequest.getDescription())
+                .users(users)
+                .owner(owner)
                 .build());
-        project.setUsers(users);
         return getResponse(project);
     }
 
@@ -101,8 +105,13 @@ public class ProjectService {
     }
 
     public List<ProjectResponse> getAllProjects(Long id) {
-        User user = userRepository.findById(id).get();
-        return user.getProjects().stream().map(this::getResponse).collect(Collectors.toList());
+        User user = userService.getById(id);
+        List<ProjectResponse> lst = projectRepository.findAllByOwner(user)
+                .stream().map(this::getResponse)
+                .collect(Collectors.toList());
+        return projectRepository.findAllByOwner(user)
+                .stream().map(this::getResponse)
+                .collect(Collectors.toList());
     }
 
 
