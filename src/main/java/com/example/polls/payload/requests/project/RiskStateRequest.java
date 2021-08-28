@@ -1,6 +1,5 @@
 package com.example.polls.payload.requests.project;
 
-import com.example.polls.model.project.RiskStateEnum;
 import lombok.Getter;
 import lombok.Setter;
 

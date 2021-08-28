@@ -10,7 +10,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.NaturalId;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -23,10 +25,10 @@ import java.util.Set;
 @Entity
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = {
-            "username"
+                "username"
         }),
         @UniqueConstraint(columnNames = {
-            "email"
+                "email"
         })
 })
 @Getter
@@ -88,17 +90,11 @@ public class User extends DateAudit {
     private List<RiskType> speciality = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "risks_users",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "risk_id"))
-    @JsonIgnore
-    private List<ProjectRisk> responsibility = new ArrayList<>();
-
-    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "projects_users",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "project_id"))
     @JsonIgnore
+    @ToString.Exclude
     private List<Project> projects = new ArrayList<>();
 
 
@@ -111,17 +107,25 @@ public class User extends DateAudit {
 
     public Set<RegTypeName> getRegTypeNames() {
         Set<RegTypeName> regTypeNameSet = new HashSet<>();
-        for( RegType it:regTypes){
+        for (RegType it : regTypes) {
             regTypeNameSet.add(it.getName());
         }
         return regTypeNameSet;
     }
 
-    public void addSpeciality(RiskType riskType){
+    public void addProject(Project project) {
+        this.projects.add(project);
+    }
+
+    public void removeProject(Project project) {
+        this.projects.remove(project);
+    }
+
+    public void addSpeciality(RiskType riskType) {
         speciality.add(riskType);
     }
 
-    public void removeSpeciality(RiskType riskType){
+    public void removeSpeciality(RiskType riskType) {
         speciality.remove(riskType);
     }
 }

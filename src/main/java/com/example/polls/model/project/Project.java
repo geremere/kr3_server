@@ -29,44 +29,27 @@ public class Project {
     private String description;
 
     @NotNull
-    @OneToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
     private User owner;
 
     @OneToOne
     @JoinColumn(name = "image_id")
     private Image image;
 
-    @OneToMany(mappedBy = "project")
-    @JsonIgnore
-    private Set<ProjectRisk> projectRisks = new HashSet<>();
-
-    @OneToMany(mappedBy = "project")
-    @JsonIgnore
-    private List<Comment> feed = new ArrayList<>();
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "projects_users",
             joinColumns = @JoinColumn(name = "project_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     @JsonIgnore
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private List<User> users = new ArrayList<>();
 
-    public void addRisk(ProjectRisk projectRisk) {
-        projectRisks.add(projectRisk);
-        projectRisk.setProject(this);
-    }
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "project_id")
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private List<ProjectRisk> risks =  new ArrayList<>();
 
-    public void removeRisk(ProjectRisk projectRisk) {
-        projectRisks.remove(projectRisk);
-    }
-
-    public void addComment(Comment comment) {
-        feed.add(comment);
-        comment.setProject(this);
-    }
-
-    public String toString() {
-        return "Project: " + getId();
-    }
 }

@@ -14,41 +14,24 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "risks")
+@Table(name = "project_risks")
 public class ProjectRisk {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToMany
-    @JoinTable(name = "risks_users",
-            joinColumns = @JoinColumn(name = "risk_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<User> owners = new ArrayList<>();
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    private Project project;
-
-    @ManyToOne
-    @JsonIgnore
+    @JoinColumn(name="risk_id")
     private Risk risk;
 
-    @OneToOne
-    @JoinColumn(name = "state_id")
-    private RiskState state;
+    @Column
+    private Boolean is_outer;
 
-    public void addUser(User user){
-        owners.add(user);
-        user.getResponsibility().add(this);
-    }
+    @Column
+    private Double cost;
 
-    public void removeUser(User user){
-        owners.remove(user);
-        user.getResponsibility().remove(this);
-    }
+    @Column
+    private Double probability;
 
-    public String toString() {
-        return "ProjectRisk: " + getId();
-    }
 }

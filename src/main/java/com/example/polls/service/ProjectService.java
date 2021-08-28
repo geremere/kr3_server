@@ -8,6 +8,8 @@ import com.example.polls.model.project.RiskType;
 import com.example.polls.model.user.User;
 import com.example.polls.payload.UserSummary;
 import com.example.polls.payload.requests.project.ProjectRequest;
+import com.example.polls.payload.requests.project.ProjectRiskDto;
+import com.example.polls.payload.requests.project.RiskDto;
 import com.example.polls.payload.response.project.ProjectResponse;
 import com.example.polls.repository.FileRepository;
 import com.example.polls.repository.UserRepository;
@@ -16,6 +18,7 @@ import com.example.polls.repository.project.ProjectRiskRepository;
 import com.example.polls.repository.project.RiskDBRepository;
 import com.example.polls.repository.project.RiskTypeRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,13 +33,13 @@ import java.util.stream.Collectors;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserService userService;
-    private final UserRepository userRepository;
     private final RiskDBRepository riskDBRepository;
     private final AWSImageService imageService;
+    private final ProjectRiskRepository projectRiskRepository;
 
 
     @Transactional
-    public ProjectResponse createProject(ProjectRequest projectRequest) throws IOException {
+    public ProjectResponse create(ProjectRequest projectRequest) throws IOException {
         List<User> users = projectRequest.getUsers().stream().map(user -> userService.getById(user.getId())).collect(Collectors.toList());
         User owner = userService.getById(projectRequest.getOwner_id());
         Image image = imageService.getFile(projectRequest.getImage_id());
@@ -47,6 +50,8 @@ public class ProjectService {
                 .users(users)
                 .owner(owner)
                 .build());
+        owner.addProject(project);
+        userService.update(owner.getId(), owner);
         return getResponse(project);
     }
 
@@ -76,43 +81,82 @@ public class ProjectService {
         return res;
     }
 
-    public ProjectResponse getProjectById(Long id) {
+    public Project get(Long id) {
         Project project = projectRepository.findById(id).get();
+        return project;
+    }
+
+    public ProjectResponse update(Long id, ProjectRequest projectRequest) {
+        Project oldProject = get(id);
+        List<User> users = projectRequest.getUsers().stream().map(user -> userService.getById(user.getId())).collect(Collectors.toList());
+        List<ProjectRisk> risks = projectRequest.getRisks().stream().map((risk) -> {
+            Risk newRisk = Risk.builder()
+                    .id(risk.getRisk().getId())
+                    .name(risk.getRisk().getName())
+                    .description(risk.getRisk().getDescription())
+                    .build();
+            Risk riskdb = riskDBRepository.save(newRisk);
+            ProjectRisk newProjectRisk = ProjectRisk.builder()
+                    .id(risk.getId())
+                    .risk(riskDBRepository.findById(riskdb.getId()))
+                    .cost(risk.getCost())
+                    .is_outer(risk.getIs_outer())
+                    .probability(risk.getProbability())
+                    .build();
+            return newProjectRisk;
+        }).collect(Collectors.toList());
+        User owner = userService.getById(projectRequest.getOwner_id());
+        Image image = imageService.getFile(projectRequest.getImage_id());
+        Project project = projectRepository.save(Project.builder()
+                .id(oldProject.getId())
+                .image(image)
+                .title(projectRequest.getTitle())
+                .description(projectRequest.getDescription())
+                .users(users)
+                .owner(owner)
+                .risks(risks)
+                .build());
+        owner.addProject(project);
+        userService.update(owner.getId(), owner);
         return getResponse(project);
     }
 
-    public void addUser(Long prId, Long userId) {
-        User user = userRepository.findById(userId).get();
-        Project project = projectRepository.findById(prId).get();
-        project.getUsers().add(user);
-        projectRepository.save(project);
-    }
-
     public ProjectResponse getResponse(Project project) {
-        List<UserSummary> users = project.getUsers().stream().map(user -> UserSummary.builder()
+        List<UserSummary> users = project.getUsers().stream()
+                .filter((user)-> !user.getId().equals(project.getOwner().getId()))
+                .map(user -> UserSummary.builder()
                 .name(user.getName())
                 .username(user.getUsername())
                 .id(user.getId())
                 .image(user.getImage())
                 .build()).collect(Collectors.toList());
+        List<ProjectRiskDto> risks = project.getRisks().stream()
+                .map(risk->ProjectRiskDto.builder()
+                        .id(risk.getId())
+                        .cost(risk.getCost())
+                        .probability(risk.getProbability())
+                        .is_outer(risk.getIs_outer())
+                        .risk(RiskDto.builder()
+                                .id(risk.getRisk().getId())
+                                .name(risk.getRisk().getName())
+                                .description(risk.getRisk().getDescription())
+                                .build())
+                        .build())
+                .collect(Collectors.toList());
         return ProjectResponse.builder()
                 .description(project.getDescription())
                 .users(users)
                 .image_url(project.getImage() != null ? project.getImage().getUrl() : null)
                 .title(project.getTitle())
                 .id(project.getId())
+                .owner_id(project.getOwner().getId())
+                .risks(risks)
                 .build();
     }
 
-    public List<ProjectResponse> getAllProjects(Long id) {
-        User user = userService.getById(id);
-        List<ProjectResponse> lst = projectRepository.findAllByOwner(user)
-                .stream().map(this::getResponse)
-                .collect(Collectors.toList());
-        return projectRepository.findAllByOwner(user)
-                .stream().map(this::getResponse)
+    public List<ProjectResponse> list(Long id) {
+        return userService.getById(id).getProjects().stream()
+                .map(this::getResponse)
                 .collect(Collectors.toList());
     }
-
-
 }

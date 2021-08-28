@@ -13,6 +13,8 @@ public class VkUser {
     private String domain;
 
     private @JsonProperty("photo_50") String photo_50;
+    private @JsonProperty("photos") Object[] photos;
+
 
     public VkUser(){}
     public String getDomain() {

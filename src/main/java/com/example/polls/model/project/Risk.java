@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "riskdb")
+@Table(name = "risks")
 public class Risk {
 
     @Id
@@ -22,6 +22,8 @@ public class Risk {
 
     @OneToMany(mappedBy = "risk")
     @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<ProjectRisk> projectRisk = new ArrayList<>();
 
     @ManyToMany
@@ -29,8 +31,8 @@ public class Risk {
             joinColumns = @JoinColumn(name = "risk_id"),
             inverseJoinColumns = @JoinColumn(name = "type_id"))
     private List<RiskType> types = new ArrayList<>();
-    @Column(length = 2000)
+
     String name;
-    @Column(length = 2000)
+
     String description;
 }
