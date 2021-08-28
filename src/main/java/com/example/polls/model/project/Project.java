@@ -46,10 +46,10 @@ public class Project {
     @ToString.Exclude
     private List<User> users = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "project_id")
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    private List<ProjectRisk> risks =  new ArrayList<>();
+    private List<ProjectRisk> risks = new ArrayList<>();
 
 }
