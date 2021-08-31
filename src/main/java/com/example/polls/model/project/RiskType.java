@@ -1,14 +1,9 @@
 package com.example.polls.model.project;
 
-import com.example.polls.model.chat.ChatRoomTypeEnum;
-import com.example.polls.model.user.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter

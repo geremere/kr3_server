@@ -2,13 +2,12 @@ package com.example.polls.payload.requests.chat;
 
 import lombok.*;
 
-@Getter
-@Setter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatRoomCreateRequest {
-    private Long[] recipientsId;
+public class MessageSendDto {
+    private Long chatId;
     private Long senderId;
-    private String chatName;
+    private String content;
 }

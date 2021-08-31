@@ -24,26 +24,27 @@ public class ChatRoom {
 
     private String title;
 
-    @OneToOne
-    @JoinColumn(name = "type_id")
-    private ChatRoomType type;
+    @Column(name = "is_dialog")
+    private Boolean isDialog;
 
     @OneToOne
     @JoinColumn(name = "image_id")
     private Image image;
 
-    @OneToMany(mappedBy = "chat")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "chat_id")
     @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<ChatMessage> chatMessages = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "chatroom_users",
             joinColumns = @JoinColumn(name = "chatroom_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<User> users = new ArrayList<>();
 
-    public String toString(){
-        return "ChatRoom: " +id;
-    }
 }

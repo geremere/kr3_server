@@ -4,11 +4,9 @@ import com.example.polls.exception.AppException;
 import com.example.polls.exception.ResourceNotFoundException;
 import com.example.polls.model.Amazon.Image;
 import com.example.polls.model.chat.ChatRoom;
-import com.example.polls.model.chat.ChatRoomTypeEnum;
 import com.example.polls.model.project.RiskType;
 import com.example.polls.model.user.User;
 import com.example.polls.payload.*;
-import com.example.polls.payload.requests.chat.ChatRoomCreateRequest;
 import com.example.polls.payload.response.ChatRoomResponse;
 import com.example.polls.payload.response.UploadFileResponse;
 import com.example.polls.repository.FileRepository;
@@ -19,6 +17,7 @@ import com.example.polls.security.UserPrincipal;
 import com.example.polls.security.CurrentUser;
 import com.example.polls.service.AWSImageService;
 import com.example.polls.service.ChatRoomService;
+import com.example.polls.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,6 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api")
@@ -52,6 +50,9 @@ public class UserController {
     private ChatRoomService chatRoomService;
     @Autowired
     private RiskTypeRepository riskTypeRepository;
+
+    @Autowired
+    private UserService userService;
 
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -119,51 +120,14 @@ public class UserController {
         return new UploadFileResponse(image.getUrl(), image.getType(), file.getSize(), image.getImageId());
     }
 
-    @GetMapping("/user/chats")
-    @PreAuthorize("hasRole('USER')")
-    public List<ChatRoomResponse> getChats(@CurrentUser UserPrincipal currentUser) {
-        User user = userRepository.findById(currentUser.getId())
-                .orElseThrow(() -> new AppException("User didnt find in setUserIMage"));
-        List<ChatRoomResponse> chats = new ArrayList<>();
-        for (ChatRoom it : user.getChatRooms()) {
-            if (it.getType().getType() == ChatRoomTypeEnum.DIALOG) {
-                for (User u : it.getUsers())
-                    if (!u.getId().equals(user.getId()))
-                        chats.add(ChatRoomResponse.builder()
-                                .title(u.getName())
-                                .image(u.getImage())
-                                .id(it.getId())
-                                .usersId(it.getUsers().stream().filter(us -> !us.getId().equals(user.getId())).map(us -> us.getId()).collect(Collectors.toList()))
-                                .build());
-                    else if (it.getUsers().size() == 1)
-                        chats.add(ChatRoomResponse.builder()
-                                .title(u.getName())
-                                .image(u.getImage())
-                                .id(it.getId())
-                                .usersId(it.getUsers().stream().filter(us -> !us.getId().equals(user.getId())).map(us -> us.getId()).collect(Collectors.toList()))
-                                .build());
-
-            } else
-                chats.add(ChatRoomResponse.builder()
-                        .title(it.getTitle())
-                        .image(it.getImage())
-                        .id(it.getId())
-                        .usersId(it.getUsers().stream().filter(us -> !us.getId().equals(user.getId())).map(us -> us.getId()).collect(Collectors.toList()))
-                        .build());
-
-        }
-        return chats;
-
-    }
-
     @GetMapping(value={"/search/","/search/{substr}"})
     @PreAuthorize("hasRole('USER')")
-    public List<UserSummary> Search(@PathVariable(required = false) String substr,
+    public List<UserSummary> search(@PathVariable(required = false) String substr,
                                     @CurrentUser UserPrincipal currentUser) {
 
         if (substr == null){
-            List<UserSummary> allUsers = userRepository.findAll().stream()
-                    .filter(user -> user.getId() != currentUser.getId())
+            return userRepository.findAll().stream()
+                    .filter(user -> !user.getId().equals(currentUser.getId()))
                     .map(user -> UserSummary.builder()
                             .id(user.getId())
                             .username(user.getUsername())
@@ -171,21 +135,8 @@ public class UserController {
                             .image(user.getImage())
                             .build())
                     .collect(Collectors.toList());
-            return allUsers;
         }
-
-        Optional<List<User>> opt = userRepository.findByNameContaining(substr);
-        List<User> resultC = new ArrayList<>();
-        if (opt.isPresent())
-            resultC = opt.get();
-        opt = userRepository.findByNameStartingWith(substr);
-        List<User> resultS = new ArrayList<>();
-        if (opt.isPresent())
-            resultS = opt.get();
-        Set<User> result = new HashSet<>();
-        result.addAll(resultC);
-        result.addAll(resultS);
-        return result.stream().map(user -> UserSummary.builder()
+        return userService.search(substr,currentUser.getId()).stream().map(user -> UserSummary.builder()
                 .id(user.getId())
                 .image(user.getImage())
                 .username(user.getUsername())
@@ -204,34 +155,4 @@ public class UserController {
                 .image(user.getImage())
                 .build();
     }
-
-    @PostMapping("/chatroom/create")
-    public ResponseEntity<ChatRoomResponse> createChatRoom(@RequestBody ChatRoomCreateRequest chatRoomCreateRequest) {
-        ChatRoom chatRoom = chatRoomService.createGroupChatRoom(chatRoomCreateRequest.getRecipientsId(), chatRoomCreateRequest.getSenderId()
-                , "CHAT", chatRoomCreateRequest.getChatName());
-        return ResponseEntity.ok(ChatRoomResponse.builder()
-                .id(chatRoom.getId())
-                .image(chatRoom.getImage())
-                .title(chatRoom.getTitle())
-                .usersId(chatRoom.getUsers().stream().map(User::getId).collect(Collectors.toList()))
-                .build());
-    }
-
-    @GetMapping("/user/me/get/types")
-    public ResponseEntity<List<RiskType>> getTypes(@CurrentUser UserPrincipal currentUser) {
-        User user = userRepository.findById(currentUser.getId()).get();
-
-        return ResponseEntity.ok(user.getSpeciality());
-    }
-
-    @PostMapping("/user/set/types")
-    public ResponseEntity<?> setTypes(@CurrentUser UserPrincipal currentUser,
-                                      @RequestBody List<Long> riskTypes) {
-        User user = userRepository.findById(currentUser.getId()).get();
-        user.setSpeciality(riskTypes.stream().map(riskTypeRepository::findById).collect(Collectors.toList()));
-        userRepository.save(user);
-        return ResponseEntity.ok("success");
-    }
-
-
 }

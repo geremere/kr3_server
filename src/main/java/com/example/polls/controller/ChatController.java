@@ -1,72 +1,60 @@
 package com.example.polls.controller;
 
 
-import com.example.polls.model.chat.ChatMessage;
-import com.example.polls.model.chat.ChatNotification;
 import com.example.polls.model.chat.ChatRoom;
-import com.example.polls.payload.requests.chat.ChatMessageRequest;
-import com.example.polls.payload.requests.chat.ChatRoomCreateRequest;
-import com.example.polls.payload.response.ChatRoomResponse;
-import com.example.polls.repository.chat.MessageStatusRepository;
-import com.example.polls.service.ChatMessageService;
+import com.example.polls.payload.chat.ChatNotification;
+import com.example.polls.payload.requests.chat.MessageSendDto;
+import com.example.polls.payload.chat.ChatRoomDto;
+import com.example.polls.security.CurrentUser;
+import com.example.polls.security.UserPrincipal;
 import com.example.polls.service.ChatRoomService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import com.example.polls.service.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
-@Controller
+@RestController
+@AllArgsConstructor
+@RequestMapping("/api")
 public class ChatController {
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-    @Autowired
-    private ChatMessageService chatMessageService;
-    @Autowired
-    private ChatRoomService chatRoomService;
-    @Autowired
-    private MessageStatusRepository messageStatusRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final ChatRoomService chatRoomService;
+    private final UserService userService;
 
 
     @MessageMapping("/chat")
-    public void processMessage(@Payload ChatMessageRequest chatMessage) {
-        ChatMessage saved = chatMessageService.save(chatMessage);
-        for (Long it : chatMessage.getRecipientsId())
-            messagingTemplate.convertAndSendToUser(
-                    it.toString(), "/queue/messages",
-                    ChatNotification.builder()
-                            .Id(saved.getId())
-                            .senderId(saved.getSenderId())
-                            .senderName(saved.getSenderName())
-                            .build());
-        messagingTemplate.convertAndSendToUser(
-                chatMessage.getSenderId().toString(), "/queue/messages",
-                ChatNotification.builder().chatId(saved.getId()).build());
+    public void sendMessage(@Payload MessageSendDto chatMessage) {
+        ChatRoom chatRoom = chatRoomService.sendMessage(chatMessage, chatMessage.getSenderId());
+        chatRoom.getUsers()
+                .forEach(user-> messagingTemplate.convertAndSendToUser(
+                            user.getId().toString(), "/queue/messages",
+                            ChatNotification.builder()
+                                    .sender(userService.toSummary(user))
+                                    .chatId(chatRoom.getId())
+                                    .build()));
     }
 
-    @GetMapping("/messages/{chatId}/count")
-    public ResponseEntity<Long> countNewMessages(@PathVariable Long chatId) {
-        return ResponseEntity
-                .ok(chatMessageService.countNewMessages(chatId));
+    @GetMapping("/chat/{recipientId}")
+    @PreAuthorize("hasRole('USER')")
+    public ChatRoomDto getChat(@PathVariable Long recipientId, @CurrentUser UserPrincipal currentUser){
+        return chatRoomService.toDto(chatRoomService.getChat(recipientId,currentUser.getId()),currentUser.getId());
     }
 
-    @GetMapping("/messages/{chatId}")
-    public ResponseEntity<?> findChatMessages(@PathVariable Long chatId) {
-        return ResponseEntity
-                .ok(chatMessageService.findChatMessages(chatId));
+    @GetMapping("/chat")
+    @PreAuthorize("hasRole('USER')")
+    public List<ChatRoomDto> getChats(@CurrentUser UserPrincipal currentUser){
+        return chatRoomService.list(currentUser.getId()).stream()
+                .map(chat-> chatRoomService.toDto(chat,currentUser.getId()))
+                .collect(Collectors.toList());
     }
 
-    @GetMapping("/message/{id}")
-    @ResponseBody
-    public ResponseEntity<?> findMessage(@PathVariable Long id) {
-        return ResponseEntity
-                .ok(chatMessageService.findById(id));
-    }
+
 }

@@ -55,37 +55,12 @@ public class ProjectService {
         return getResponse(project);
     }
 
-    @Transactional
-    public List<Long> getUsersIdByProject(Long prId) {
-        return projectRepository.findById(prId).get().
-                getUsers().stream()
-                .map(User::getId)
-                .collect(Collectors.toList());
-    }
-
-    public List<UserSummary> getAvailableUser(Long prId, Long riskId) {
-        Risk projectRisk = riskDBRepository.findById(riskId);
-        Project project = projectRepository.findById(prId).get();
-        List<User> users = project.getUsers();
-        List<UserSummary> res = new ArrayList<>();
-        for (RiskType type : projectRisk.getTypes()) {
-            for (User user : users) {
-                List<Long> usersSpecialityesId = user.getSpeciality().stream().map(RiskType::getId).collect(Collectors.toList());
-                List<Long> choosenUsers = res.stream().map(UserSummary::getId).collect(Collectors.toList());
-                if (usersSpecialityesId.contains(type.getId()) && !choosenUsers.contains(user.getId())) {
-                    res.add(userService.getSummary(user));
-                }
-
-            }
-        }
-        return res;
-    }
-
     public Project get(Long id) {
         Project project = projectRepository.findById(id).get();
         return project;
     }
 
+    @Transactional
     public ProjectResponse update(Long id, ProjectRequest projectRequest) {
         Project oldProject = get(id);
         List<User> users = projectRequest.getUsers().stream().map(user -> userService.getById(user.getId())).collect(Collectors.toList());
@@ -130,7 +105,8 @@ public class ProjectService {
                 .id(user.getId())
                 .image(user.getImage())
                 .build()).collect(Collectors.toList());
-        List<ProjectRiskDto> risks = project.getRisks().stream()
+        List<ProjectRiskDto> risks = project.getRisks()!=null?
+                project.getRisks().stream()
                 .map(risk->ProjectRiskDto.builder()
                         .id(risk.getId())
                         .cost(risk.getCost())
@@ -142,7 +118,8 @@ public class ProjectService {
                                 .description(risk.getRisk().getDescription())
                                 .build())
                         .build())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())
+                : new ArrayList<>();
         return ProjectResponse.builder()
                 .description(project.getDescription())
                 .users(users)

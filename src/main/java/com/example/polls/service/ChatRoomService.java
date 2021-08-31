@@ -2,82 +2,101 @@ package com.example.polls.service;
 
 import com.example.polls.model.chat.ChatMessage;
 import com.example.polls.model.chat.ChatRoom;
-import com.example.polls.model.chat.ChatRoomType;
-import com.example.polls.model.chat.ChatRoomTypeEnum;
 import com.example.polls.model.user.User;
-import com.example.polls.payload.requests.chat.ChatMessageRequest;
-import com.example.polls.repository.UserRepository;
+import com.example.polls.payload.requests.chat.MessageSendDto;
+import com.example.polls.payload.chat.ChatRoomDto;
+import com.example.polls.payload.chat.MessageDto;
 import com.example.polls.repository.chat.ChatRoomRepository;
-import com.example.polls.repository.chat.ChatRoomTypeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class ChatRoomService {
 
-    @Autowired
-    private ChatRoomRepository chatRoomRepository;
-    @Autowired
-    private ChatRoomTypeRepository chatRoomTypeRepository;
-    @Autowired
-    private UserRepository userRepository;
+    private final ChatRoomRepository repository;
+    private final UserService userService;
 
 
-    public ChatRoom getChatRoom(ChatMessageRequest chatMessage) {
-//        код будет работать тут только для диалогов, чаты для более чем одного будут создаваться отдельно
-        if (chatMessage.getChatId() == null) {
-            return createChatRoom(chatMessage.getRecipientsId(), chatMessage.getSenderId(), "DIALOG");
-        }
-        return chatRoomRepository.findById(chatMessage.getChatId()).get();
+    public ChatRoom fromDto(ChatRoomDto chatRoomDto) {
+        List<User> users = chatRoomDto.getUsers().stream()
+                .map(user -> userService.getById(user.getId()))
+                .collect(Collectors.toList());
+        return ChatRoom.builder()
+                .id(chatRoomDto.getId())
+                .image(chatRoomDto.getImage())
+                .title(chatRoomDto.getTitle())
+                .users(users)
+                .isDialog(chatRoomDto.getIsDialog())
+                .build();
     }
 
-    public ChatRoom createChatRoom(Long[] recipientsId, Long senderId, String type) {
-        ChatRoomType chatRoomType = chatRoomTypeRepository.findChatRoomTypeByType(ChatRoomTypeEnum.valueOf(type)).get();
-        ChatRoom chatRoom = ChatRoom
-                .builder()
-                .title("")
-                .type(chatRoomType)
+    public ChatRoomDto toDto(ChatRoom chatRoom, Long senderId) {
+        List<MessageDto> messagesDto = chatRoom.getChatMessages() != null ?
+                chatRoom.getChatMessages().stream()
+                        .map(message -> MessageDto.builder()
+                                .id(message.getId())
+                                .sender(userService.toSummary(message.getSender()))
+                                .content(message.getContent())
+                                .updatedAt(message.getUpdatedAt())
+                                .build())
+                        .collect(Collectors.toList())
+                : new ArrayList<>();
+        return ChatRoomDto.builder()
+                .isDialog(chatRoom.getIsDialog())
+                .messages(messagesDto)
+                .title(chatRoom.getTitle())
+                .id(chatRoom.getId())
+                .users(chatRoom.getUsers().stream()
+                        .map(userService::toSummary)
+                        .collect(Collectors.toList()))
+                .image(chatRoom.getImage())
+                .lastMessage(messagesDto.isEmpty() ? "нет сообщений" : messagesDto.get(messagesDto.size() - 1).getContent())
                 .build();
-        chatRoomRepository.save(chatRoom);
-
-        User user = userRepository.findById(recipientsId[0]).get();
-        user.getChatRooms().add(chatRoom);
-        if (!recipientsId[0].equals(senderId)) {
-            User currentUser = userRepository.findById(senderId).get();
-            currentUser.getChatRooms().add(chatRoom);
-        }
-        return chatRoom;
     }
 
     @Transactional
-    public ChatRoom createGroupChatRoom(Long[] recipientsId, Long senderId, String type, String chatName) {
-        ChatRoomType chatRoomType = chatRoomTypeRepository.findChatRoomTypeByType(ChatRoomTypeEnum.valueOf(type)).get();
-        List<User> users = new ArrayList<>();
-        for (Long i : recipientsId) {
-            if (i.longValue()!=senderId.longValue())
-                users.add(userRepository.findById(i).get());
+    public ChatRoom getChat(Long recipientId, Long senderId) {
+        if (repository.isChatExist(recipientId, senderId)) {
+            return repository.findChatByUsersId(recipientId, senderId);
+        } else {
+            List<User> users = new ArrayList<>();
+            users.add(userService.getById(recipientId));
+            users.add(userService.getById(senderId));
+
+            return repository.save(ChatRoom.builder()
+                    .users(users)
+                    .isDialog(false)
+                    .build());
         }
-        users.add(userRepository.findById(senderId).get());
-        ChatRoom chatRoom = ChatRoom
-                .builder()
-                .title(chatName)
-                .users(users)
-                .type(chatRoomType)
-                .build();
-        chatRoomRepository.save(chatRoom);
-//
-//        User user = userRepository.findById(recipientsId[0]).get();
-//        user.getChatRooms().add(chatRoom);
-//        if(!recipientsId[0].equals(senderId)) {
-//            User currentUser = userRepository.findById(senderId).get();
-//            currentUser.getChatRooms().add(chatRoom);
-//        }
-        return chatRoom;
+    }
+
+    public ChatRoom update(ChatRoom chatRoom) {
+        ChatRoom oldChatRoom = repository.findById(chatRoom.getId());
+        chatRoom.setId(oldChatRoom.getId());
+        return repository.save(chatRoom);
+    }
+
+    @Transactional
+    public ChatRoom sendMessage(MessageSendDto sendDto, Long senderId) {
+        ChatRoom chatRoom = repository.findById(sendDto.getChatId());
+        chatRoom.getChatMessages().add(ChatMessage.builder()
+                .content(sendDto.getContent())
+                .isDelivered(false)
+                .sender(userService.getById(senderId))
+                .build());
+        return repository.save(chatRoom);
+
+    }
+
+    public List<ChatRoom> list(Long userId) {
+        return userService.getById(userId).getChatRooms();
     }
 }

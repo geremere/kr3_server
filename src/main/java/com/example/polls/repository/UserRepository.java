@@ -28,9 +28,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findById(Long id);
 
-//    List<User> findAll(Predicate<User> filter);
 
-    Optional<List<User>> findByNameContaining(String substr);
+    List<User> findByNameContaining(String substr);
 
-    Optional<List<User>> findByNameStartingWith(String substr);
 }

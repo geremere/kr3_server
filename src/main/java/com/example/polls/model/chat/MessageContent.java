@@ -18,7 +18,6 @@ public class MessageContent {
 
     private String content;
 
-    @OneToOne
-    @JoinColumn(name = "type_id")
-    private MessageContentType type;
+//    @Column(name = "is_text")
+//    private boolean isText;
 }
