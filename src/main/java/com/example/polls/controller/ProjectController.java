@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 
-@Controller
+@RestController
 @AllArgsConstructor
 @RequestMapping("/api")
 public class ProjectController {
@@ -26,14 +26,15 @@ public class ProjectController {
 
     @PostMapping("/project")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ProjectResponse> create(@RequestBody ProjectRequest projectRequest) throws IOException {
+    public ResponseEntity<ProjectResponse> create(@RequestBody ProjectRequest projectRequest,
+                                                  @CurrentUser UserPrincipal currentUser) throws IOException {
         return ResponseEntity.ok(projectService.create(projectRequest));
     }
 
     @GetMapping("/project")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<ProjectResponse>> list(@CurrentUser UserPrincipal currentUser) {
-        return ResponseEntity.ok(projectService.list(currentUser.getId()));
+    public ResponseEntity<List<ProjectResponse>> list() {
+        return ResponseEntity.ok(projectService.list());
     }
 
 

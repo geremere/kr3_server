@@ -34,4 +34,6 @@ public class ProjectRisk {
     @Column
     private Double probability;
 
+    @Column
+    private Boolean isSolved;
 }

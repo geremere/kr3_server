@@ -26,11 +26,9 @@ public class Risk {
     @EqualsAndHashCode.Exclude
     private List<ProjectRisk> projectRisk = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(name = "types_risks",
-            joinColumns = @JoinColumn(name = "risk_id"),
-            inverseJoinColumns = @JoinColumn(name = "type_id"))
-    private List<RiskType> types = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "type_id")
+    private RiskType type;
 
     String name;
 

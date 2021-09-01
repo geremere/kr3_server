@@ -9,6 +9,7 @@ import com.example.polls.security.CurrentUser;
 import com.example.polls.security.UserPrincipal;
 import com.example.polls.service.ChatRoomService;
 import com.example.polls.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api")
+@Tag(name="Контроллер для работы с чатом")
 public class ChatController {
 
     private final SimpMessagingTemplate messagingTemplate;

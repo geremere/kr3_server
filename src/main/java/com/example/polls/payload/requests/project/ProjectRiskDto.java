@@ -14,5 +14,6 @@ public class ProjectRiskDto{
     private Double probability;
     private Boolean is_outer;
     private RiskDto risk;
+    private Boolean is_solved;
 
 }

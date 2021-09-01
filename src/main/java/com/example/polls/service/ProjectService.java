@@ -77,6 +77,7 @@ public class ProjectService {
                     .cost(risk.getCost())
                     .is_outer(risk.getIs_outer())
                     .probability(risk.getProbability())
+                    .isSolved(risk.getIs_solved())
                     .build();
             return newProjectRisk;
         }).collect(Collectors.toList());
@@ -116,7 +117,9 @@ public class ProjectService {
                                 .id(risk.getRisk().getId())
                                 .name(risk.getRisk().getName())
                                 .description(risk.getRisk().getDescription())
+//                                .type(risk.getRisk().getType().toString())
                                 .build())
+                        .is_solved(risk.getIsSolved())
                         .build())
                 .collect(Collectors.toList())
                 : new ArrayList<>();
@@ -131,8 +134,8 @@ public class ProjectService {
                 .build();
     }
 
-    public List<ProjectResponse> list(Long id) {
-        return userService.getById(id).getProjects().stream()
+    public List<ProjectResponse> list() {
+        return projectRepository.findAll().stream()
                 .map(this::getResponse)
                 .collect(Collectors.toList());
     }

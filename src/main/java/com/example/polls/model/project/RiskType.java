@@ -22,11 +22,4 @@ public class RiskType {
     @NaturalId
     @Column(length = 60)
     private RiskTypeEnum type;
-
-//    @ManyToMany(fetch = FetchType.LAZY)
-//    @JoinTable(name = "risks_users",
-//            joinColumns = @JoinColumn(name = "chatroom_id"),
-//            inverseJoinColumns = @JoinColumn(name = "user_id"))
-//    @JsonIgnore
-//    private List<User> users = new ArrayList<>();
 }
