@@ -8,6 +8,5 @@ import java.util.List;
 
 public interface RiskTypeRepository  extends JpaRepository<RiskType,String> {
     RiskType findByType(RiskTypeEnum type);
-    List<RiskType> findAll();
     RiskType findById(Long id);
 }

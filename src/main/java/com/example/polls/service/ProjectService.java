@@ -1,10 +1,7 @@
 package com.example.polls.service;
 
 import com.example.polls.model.Amazon.Image;
-import com.example.polls.model.project.Project;
-import com.example.polls.model.project.ProjectRisk;
-import com.example.polls.model.project.Risk;
-import com.example.polls.model.project.RiskType;
+import com.example.polls.model.project.*;
 import com.example.polls.model.user.User;
 import com.example.polls.payload.UserSummary;
 import com.example.polls.payload.requests.project.ProjectRequest;
@@ -26,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +33,7 @@ public class ProjectService {
     private final UserService userService;
     private final RiskDBRepository riskDBRepository;
     private final AWSImageService imageService;
-    private final ProjectRiskRepository projectRiskRepository;
+    private final RiskTypeRepository riskTypeRepository;
 
 
     @Transactional
@@ -69,6 +67,7 @@ public class ProjectService {
                     .id(risk.getRisk().getId())
                     .name(risk.getRisk().getName())
                     .description(risk.getRisk().getDescription())
+                    .type(riskTypeRepository.findByType(RiskTypeEnum.of(risk.getRisk().getType())))
                     .build();
             Risk riskdb = riskDBRepository.save(newRisk);
             ProjectRisk newProjectRisk = ProjectRisk.builder()
@@ -77,7 +76,7 @@ public class ProjectService {
                     .cost(risk.getCost())
                     .is_outer(risk.getIs_outer())
                     .probability(risk.getProbability())
-                    .isSolved(risk.getIs_solved())
+                    .isSolved(risk.getIs_solved() != null && risk.getIs_solved())
                     .build();
             return newProjectRisk;
         }).collect(Collectors.toList());
@@ -99,29 +98,29 @@ public class ProjectService {
 
     public ProjectResponse getResponse(Project project) {
         List<UserSummary> users = project.getUsers().stream()
-                .filter((user)-> !user.getId().equals(project.getOwner().getId()))
+                .filter((user) -> !user.getId().equals(project.getOwner().getId()))
                 .map(user -> UserSummary.builder()
-                .name(user.getName())
-                .username(user.getUsername())
-                .id(user.getId())
-                .image(user.getImage())
-                .build()).collect(Collectors.toList());
-        List<ProjectRiskDto> risks = project.getRisks()!=null?
+                        .name(user.getName())
+                        .username(user.getUsername())
+                        .id(user.getId())
+                        .image(user.getImage())
+                        .build()).collect(Collectors.toList());
+        List<ProjectRiskDto> risks = project.getRisks() != null ?
                 project.getRisks().stream()
-                .map(risk->ProjectRiskDto.builder()
-                        .id(risk.getId())
-                        .cost(risk.getCost())
-                        .probability(risk.getProbability())
-                        .is_outer(risk.getIs_outer())
-                        .risk(RiskDto.builder()
-                                .id(risk.getRisk().getId())
-                                .name(risk.getRisk().getName())
-                                .description(risk.getRisk().getDescription())
-//                                .type(risk.getRisk().getType().toString())
+                        .map(risk -> ProjectRiskDto.builder()
+                                .id(risk.getId())
+                                .cost(risk.getCost())
+                                .probability(risk.getProbability())
+                                .is_outer(risk.getIs_outer())
+                                .risk(RiskDto.builder()
+                                        .id(risk.getRisk().getId())
+                                        .name(risk.getRisk().getName())
+                                        .description(risk.getRisk().getDescription())
+                                        .type(risk.getRisk().getType().getType().getValue())
+                                        .build())
+                                .is_solved(risk.getIsSolved())
                                 .build())
-                        .is_solved(risk.getIsSolved())
-                        .build())
-                .collect(Collectors.toList())
+                        .collect(Collectors.toList())
                 : new ArrayList<>();
         return ProjectResponse.builder()
                 .description(project.getDescription())

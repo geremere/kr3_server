@@ -10,8 +10,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RiskDto {
-        private Long id;
-        private String name;
-        private String description;
-        private String type;
+    private Long id;
+    private String name;
+    private String description;
+    private String type;
 }

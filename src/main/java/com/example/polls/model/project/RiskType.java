@@ -19,7 +19,5 @@ public class RiskType {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @NaturalId
-    @Column(length = 60)
     private RiskTypeEnum type;
 }
