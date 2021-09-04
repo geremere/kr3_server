@@ -15,4 +15,5 @@ public class UserSummary {
     private String username;
     private String name;
     private Image image;
+    private String email;
 }

@@ -49,7 +49,7 @@ public class ProjectService {
                 .owner(owner)
                 .build());
         owner.addProject(project);
-        userService.update(owner.getId(), owner);
+        userService.save(owner);
         return getResponse(project);
     }
 
@@ -92,7 +92,7 @@ public class ProjectService {
                 .risks(risks)
                 .build());
         owner.addProject(project);
-        userService.update(owner.getId(), owner);
+        userService.save(owner);
         return getResponse(project);
     }
 

@@ -151,8 +151,7 @@ public class AuthController {
                     orElseThrow(() -> new AppException("User Role not set."));
 
             newUser.setRoles(Collections.singleton(userRole));
-            RegType userRegType = regTypeRepository.findByName(RegTypeName.VK)
-                    .orElseThrow(() -> new AppException("User RegType not set."));
+            RegType userRegType = regTypeRepository.findByName(RegTypeName.VK);
 
             newUser.setRegTypes(Collections.singleton(userRegType));
 
@@ -207,8 +206,7 @@ public class AuthController {
                 .orElseThrow(() -> new AppException("User Role not set."));
 
         user.setRoles(Collections.singleton(userRole));
-        RegType userRegType = regTypeRepository.findByName(RegTypeName.DEFAULT)
-                .orElseThrow(() -> new AppException("User RegType not set."));
+        RegType userRegType = regTypeRepository.findByName(RegTypeName.DEFAULT);
 
         user.setRegTypes(Collections.singleton(userRegType));
 
