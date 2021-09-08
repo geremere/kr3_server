@@ -82,13 +82,6 @@ public class User extends DateAudit {
     @JsonIgnore
     private List<ChatRoom> chatRooms = new ArrayList<>();
 
-//    @ManyToMany(fetch = FetchType.LAZY)
-//    @JoinTable(name = "risktypes_users",
-//            joinColumns = @JoinColumn(name = "user_id"),
-//            inverseJoinColumns = @JoinColumn(name = "risktype_id"))
-//    @JsonIgnore
-//    private List<RiskType> speciality = new ArrayList<>();
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "projects_users",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -115,9 +108,5 @@ public class User extends DateAudit {
 
     public void addProject(Project project) {
         this.projects.add(project);
-    }
-
-    public void removeProject(Project project) {
-        this.projects.remove(project);
     }
 }

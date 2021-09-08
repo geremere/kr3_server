@@ -16,5 +16,5 @@ public class MessageDto {
     private Long id;
     private UserSummary sender;
     private String content;
-    private LocalDateTime updatedAt;
+    private String updatedAt;
 }

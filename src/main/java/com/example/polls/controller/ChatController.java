@@ -35,7 +35,8 @@ public class ChatController {
     @MessageMapping("/chat")
     public void sendMessage(@Payload MessageSendDto chatMessage) {
         ChatRoom chatRoom = chatRoomService.sendMessage(chatMessage, chatMessage.getSenderId());
-        chatRoom.getUsers()
+        chatRoom.getUsers().stream()
+                .filter(user -> !user.getId().equals(chatMessage.getSenderId()))
                 .forEach(user-> messagingTemplate.convertAndSendToUser(
                             user.getId().toString(), "/queue/messages",
                             ChatNotification.builder()

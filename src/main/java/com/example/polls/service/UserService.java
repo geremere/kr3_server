@@ -6,6 +6,7 @@ import com.example.polls.model.user.RegTypeName;
 import com.example.polls.model.user.User;
 import com.example.polls.payload.UserSummary;
 import com.example.polls.payload.user.ChangePasswordDto;
+import com.example.polls.payload.user.RegTypeDto;
 import com.example.polls.repository.RegTypeRepository;
 import com.example.polls.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -55,11 +56,13 @@ public class UserService {
 
     }
 
-    public boolean hasDefaultRegistration(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new AppException("User not found"))
-                .getRegTypeNames()
-                .contains(RegTypeName.DEFAULT);
+    public RegTypeDto getRegTypes(Long id) {
+       User user =  userRepository.findById(id)
+                .orElseThrow(() -> new AppException("User not found"));
+       return RegTypeDto.builder()
+               .isDefault(user.getRegTypeNames().contains(RegTypeName.DEFAULT))
+               .isVk(user.getRegTypeNames().contains(RegTypeName.VK))
+               .build();
     }
 
     public boolean changePassword(ChangePasswordDto changePasswordDto, Long id) {

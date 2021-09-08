@@ -139,10 +139,6 @@ public class AuthController {
             jwt = tokenProvider.generateToken(authentication);
 
         } else {
-//            if (userRepository.existsByEmail(accessTokenVkResponse.getEmail())) {
-//                return new ResponseEntity<>(new ApiResponse(false, "Такой email уже привзяан к другому аккаунту!"),
-//                        HttpStatus.BAD_REQUEST);
-//            }
 
             User newUser = new User(user.getLast_name()+ " " +user.getFirst_name() , user.getDomain(), (accessTokenVkResponse.getEmail() == "" || accessTokenVkResponse.getEmail() == null) ? "default@mail.ru" : accessTokenVkResponse.getEmail(),
                     user.getDomain());

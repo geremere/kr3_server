@@ -14,7 +14,7 @@ public class ChatRoomDto {
     private List<UserSummary> users;
     private String title;
     private List<MessageDto> messages;
-    private String lastMessage;
+    private MessageDto lastMessage;
     private Image image;
     private Boolean isDialog;
 }

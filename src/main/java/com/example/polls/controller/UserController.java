@@ -7,6 +7,7 @@ import com.example.polls.payload.UserIdentityAvailability;
 import com.example.polls.payload.UserSummary;
 import com.example.polls.payload.response.UploadFileResponse;
 import com.example.polls.payload.user.ChangePasswordDto;
+import com.example.polls.payload.user.RegTypeDto;
 import com.example.polls.repository.UserRepository;
 import com.example.polls.security.CurrentUser;
 import com.example.polls.security.UserPrincipal;
@@ -124,8 +125,8 @@ public class UserController {
 
     @GetMapping("/user/isDefault")
     @PreAuthorize("hasRole('USER')")
-    public boolean hasDefaultRegistration(@CurrentUser UserPrincipal currentUser){
-        return userService.hasDefaultRegistration(currentUser.getId());
+    public RegTypeDto getRegTypes(@CurrentUser UserPrincipal currentUser){
+        return userService.getRegTypes(currentUser.getId());
     }
 
     @PostMapping("/user/password")

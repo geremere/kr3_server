@@ -55,7 +55,7 @@ public class UserPrincipal implements UserDetails {
         List<GrantedAuthority> regTypes = user.getRegTypes().stream().map(type ->
                 new SimpleGrantedAuthority(type.getName().name())).collect(Collectors.toList());
 
-        return new UserPrincipal(
+        UserPrincipal userPrincipal =  new UserPrincipal(
                 user.getId(),
                 user.getName(),
                 user.getUsername(),
@@ -65,6 +65,7 @@ public class UserPrincipal implements UserDetails {
                 regTypes,
                 user.getImage()
         );
+        return userPrincipal;
     }
 
     public Long getId() {

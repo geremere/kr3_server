@@ -3,6 +3,7 @@ package com.example.polls.service;
 import com.example.polls.model.chat.ChatMessage;
 import com.example.polls.model.chat.ChatRoom;
 import com.example.polls.model.user.User;
+import com.example.polls.payload.UserSummary;
 import com.example.polls.payload.requests.chat.MessageSendDto;
 import com.example.polls.payload.chat.ChatRoomDto;
 import com.example.polls.payload.chat.MessageDto;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +47,7 @@ public class ChatRoomService {
                                 .id(message.getId())
                                 .sender(userService.toSummary(message.getSender()))
                                 .content(message.getContent())
-                                .updatedAt(message.getUpdatedAt())
+                                .updatedAt(message.getUpdatedAt().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
                                 .build())
                         .collect(Collectors.toList())
                 : new ArrayList<>();
@@ -58,7 +60,8 @@ public class ChatRoomService {
                         .map(userService::toSummary)
                         .collect(Collectors.toList()))
                 .image(chatRoom.getImage())
-                .lastMessage(messagesDto.isEmpty() ? "нет сообщений" : messagesDto.get(messagesDto.size() - 1).getContent())
+                .lastMessage(messagesDto.isEmpty() ? null
+                        : messagesDto.get(messagesDto.size() - 1))
                 .build();
     }
 
