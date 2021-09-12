@@ -9,5 +9,7 @@ import lombok.*;
 public class ChatNotification {
 
     private UserSummary sender;
+    private String chatName;
+    private String content;
     private Long chatId;
 }

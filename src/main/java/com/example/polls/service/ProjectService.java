@@ -1,29 +1,28 @@
 package com.example.polls.service;
 
 import com.example.polls.model.Amazon.Image;
-import com.example.polls.model.project.*;
+import com.example.polls.model.chat.ChatRoom;
+import com.example.polls.model.project.Project;
+import com.example.polls.model.project.ProjectRisk;
+import com.example.polls.model.project.Risk;
+import com.example.polls.model.project.RiskTypeEnum;
 import com.example.polls.model.user.User;
 import com.example.polls.payload.UserSummary;
 import com.example.polls.payload.requests.project.ProjectRequest;
 import com.example.polls.payload.requests.project.ProjectRiskDto;
 import com.example.polls.payload.requests.project.RiskDto;
 import com.example.polls.payload.response.project.ProjectResponse;
-import com.example.polls.repository.FileRepository;
-import com.example.polls.repository.UserRepository;
+import com.example.polls.repository.chat.ChatRoomRepository;
 import com.example.polls.repository.project.ProjectRepository;
-import com.example.polls.repository.project.ProjectRiskRepository;
 import com.example.polls.repository.project.RiskDBRepository;
 import com.example.polls.repository.project.RiskTypeRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +30,7 @@ import java.util.stream.Collectors;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserService userService;
+    private final ChatRoomRepository chatRoomRepository;
     private final RiskDBRepository riskDBRepository;
     private final AWSImageService imageService;
     private final RiskTypeRepository riskTypeRepository;
@@ -48,8 +48,15 @@ public class ProjectService {
                 .users(users)
                 .owner(owner)
                 .build());
-        owner.addProject(project);
-        userService.save(owner);
+//        owner.addProject(project);
+        users.add(owner);
+        chatRoomRepository.save(ChatRoom.builder()
+                .isDialog(true)
+                .image(project.getImage())
+                .title(project.getTitle())
+                .users(users)
+                .build());
+//        userService.save(owner);
         return getResponse(project);
     }
 

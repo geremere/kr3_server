@@ -4,6 +4,7 @@ import com.example.polls.model.chat.ChatMessage;
 import com.example.polls.model.chat.ChatRoom;
 import com.example.polls.model.user.User;
 import com.example.polls.payload.UserSummary;
+import com.example.polls.payload.chat.ChatRoomShortDto;
 import com.example.polls.payload.requests.chat.MessageSendDto;
 import com.example.polls.payload.chat.ChatRoomDto;
 import com.example.polls.payload.chat.MessageDto;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,15 +42,11 @@ public class ChatRoomService {
                 .build();
     }
 
-    public ChatRoomDto toDto(ChatRoom chatRoom, Long senderId) {
+    public ChatRoomDto toDto(ChatRoom chatRoom) {
         List<MessageDto> messagesDto = chatRoom.getChatMessages() != null ?
                 chatRoom.getChatMessages().stream()
-                        .map(message -> MessageDto.builder()
-                                .id(message.getId())
-                                .sender(userService.toSummary(message.getSender()))
-                                .content(message.getContent())
-                                .updatedAt(message.getUpdatedAt().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
-                                .build())
+                        .sorted(Comparator.comparing(ChatMessage::getUpdatedAt))
+                        .map(this::toDto)
                         .collect(Collectors.toList())
                 : new ArrayList<>();
         return ChatRoomDto.builder()
@@ -63,6 +61,43 @@ public class ChatRoomService {
                 .lastMessage(messagesDto.isEmpty() ? null
                         : messagesDto.get(messagesDto.size() - 1))
                 .build();
+    }
+
+    public MessageDto toDto(ChatMessage chatMessage){
+        return MessageDto.builder()
+                .sender(userService.toSummary(chatMessage.getSender()))
+                .id(chatMessage.getId())
+                .content(chatMessage.getContent())
+                .updatedAt(chatMessage.getUpdatedAt().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
+                .build();
+    }
+
+    public ChatRoomShortDto toShortDto(ChatRoom chatRoom, Long currentUserId){
+        MessageDto lastMessage = chatRoom.getChatMessages().stream()
+                .reduce((f,s)->f.getUpdatedAt().compareTo(s.getUpdatedAt())>0?f:s)
+                .map(this::toDto)
+                .get();
+        Long countNewMessages = chatRoom.getChatMessages().stream()
+                .filter(message-> !message.getSender().getId().equals(currentUserId))
+                .filter(message-> !message.isDelivered())
+                .count();
+        return ChatRoomShortDto.builder()
+                .id(chatRoom.getId())
+                .isDialog(chatRoom.getIsDialog())
+                .title(chatRoom.getTitle())
+                .lastMessage(lastMessage)
+                .image(chatRoom.getImage())
+                .countNewMessage(countNewMessages)
+                .users(chatRoom.getUsers().stream()
+                        .map(userService::toSummary)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    public ChatRoom findById(Long id){
+        ChatRoom chatRoom =  repository.findById(id);
+        chatRoom.getChatMessages().forEach(message-> message.setDelivered(true));
+        return repository.save(chatRoom);
     }
 
     @Transactional
@@ -88,12 +123,12 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public ChatRoom sendMessage(MessageSendDto sendDto, Long senderId) {
+    public ChatRoom sendMessage(MessageSendDto sendDto) {
         ChatRoom chatRoom = repository.findById(sendDto.getChatId());
         chatRoom.getChatMessages().add(ChatMessage.builder()
                 .content(sendDto.getContent())
                 .isDelivered(false)
-                .sender(userService.getById(senderId))
+                .sender(userService.getById(sendDto.getSenderId()))
                 .build());
         return repository.save(chatRoom);
 
