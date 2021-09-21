@@ -1,5 +1,6 @@
 package com.example.polls.model.project;
 
+import com.example.polls.model.Amazon.AWSFile;
 import com.example.polls.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
@@ -24,6 +25,10 @@ public class ProjectRisk {
     @JsonIgnore
     @JoinColumn(name="risk_id")
     private Risk risk;
+
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name ="excel_id")
+    private AWSFile excel;
 
     @Column
     private Boolean is_outer;

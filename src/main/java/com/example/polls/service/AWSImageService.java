@@ -4,7 +4,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.polls.model.Amazon.Image;
-import com.example.polls.repository.FileRepository;
+import com.example.polls.repository.ImageRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.imgscalr.Scalr;
@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 @Transactional
 public class AWSImageService  extends AWSClientService{
 
-    private final FileRepository fileRepository;
+    private final ImageRepository imageRepository;
 
     public Image store(MultipartFile multipartFile) throws IOException {
         String extension = multipartFile.getOriginalFilename()
@@ -39,7 +39,7 @@ public class AWSImageService  extends AWSClientService{
 
         String url = resizeAndUpload(fileName + extension, multipartFile);
         Image image = new Image(url, multipartFile.getContentType());
-        return fileRepository.save(image);
+        return imageRepository.save(image);
     }
 
     public Image storeResourceImage(MultipartFile multipartFile, String type) throws IOException {
@@ -53,7 +53,7 @@ public class AWSImageService  extends AWSClientService{
 
         String url = uploadResourceImage(fileName + extension, multipartFile, type);
         Image image = new Image(url, multipartFile.getContentType());
-        return fileRepository.save(image);
+        return imageRepository.save(image);
     }
 
     private File convertMultiPartToFile(MultipartFile file) throws IOException {
@@ -113,7 +113,7 @@ public class AWSImageService  extends AWSClientService{
     public void deleteImage(Image image) {
         String key = image.getUrl().substring(getEndPoint().length() + 1);
         getClient().deleteObject(getBucketName(), key);
-        fileRepository.delete(image);
+        imageRepository.delete(image);
     }
 
     private String generateFileName(String originalName) {
@@ -121,7 +121,7 @@ public class AWSImageService  extends AWSClientService{
     }
 
     public Image getFile(Long fileId) {
-        return fileRepository.findByImageId(fileId);
+        return imageRepository.findByImageId(fileId);
     }
 }
 

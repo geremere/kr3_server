@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +35,7 @@ public class ProjectService {
     private final RiskDBRepository riskDBRepository;
     private final AWSImageService imageService;
     private final RiskTypeRepository riskTypeRepository;
+    private static Random rnd = new Random();
 
 
     @Transactional
@@ -145,4 +147,6 @@ public class ProjectService {
                 .map(this::getResponse)
                 .collect(Collectors.toList());
     }
+
+
 }

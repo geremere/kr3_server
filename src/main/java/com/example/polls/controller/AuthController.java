@@ -15,7 +15,7 @@ import com.example.polls.payload.requests.LoginRequest;
 import com.example.polls.payload.requests.SignUpRequest;
 import com.example.polls.payload.response.VkAuthResponse;
 import com.example.polls.payload.response.VkResponseUser;
-import com.example.polls.repository.FileRepository;
+import com.example.polls.repository.ImageRepository;
 import com.example.polls.repository.RegTypeRepository;
 import com.example.polls.repository.RoleRepository;
 import com.example.polls.repository.UserRepository;
@@ -72,7 +72,7 @@ public class AuthController {
     UserService userService;
 
     @Autowired
-    FileRepository fileRepository;
+    ImageRepository imageRepository;
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Validated @RequestBody LoginRequest loginRequest) {
@@ -157,7 +157,7 @@ public class AuthController {
 
             Image image = new Image(user.getPhoto_50(), "image/jpeg");
 
-            fileRepository.save(image);
+            imageRepository.save(image);
 
             newUser.setImage(image);
 
