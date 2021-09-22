@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @AllArgsConstructor
@@ -68,8 +69,8 @@ public class ProjectController {
 
     @PostMapping("/risks/file/{riskId}")
     @PreAuthorize("hasRole('USER')")
-    public Workbook saveExcel(@RequestParam(value = "file", required = true) MultipartFile file,
-                              @PathVariable(name = "riskId", required = true) Long riskId) {
+    public Map<String, List<Long>> saveExcel(@RequestParam(value = "file", required = true) MultipartFile file,
+                                             @PathVariable(name = "riskId", required = true) Long riskId) {
         try {
             AWSFile savedFile = fileService.store(file);
             ProjectRisk risk = projectRiskService.get(riskId);
@@ -83,7 +84,7 @@ public class ProjectController {
 
     @GetMapping("/risks/file/{riskId}")
     @PreAuthorize("hasRole('USER')")
-    public Workbook getExcel(@PathVariable(name = "riskId", required = true) Long riskId) {
+    public Map<String, List<Long>> getExcel(@PathVariable(name = "riskId", required = true) Long riskId) {
         return projectRiskService.getTable(riskId);
     }
 }
