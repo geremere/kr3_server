@@ -15,5 +15,5 @@ public class ProjectRiskDto{
     private Boolean is_outer;
     private RiskDto risk;
     private Boolean is_solved;
-
+    private Boolean hasSensitivity;
 }

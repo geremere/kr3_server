@@ -45,32 +45,43 @@ public class ProjectRiskService {
         return repository.findById(riskId).orElseThrow(() -> new NotFoundException("риск не найден"));
     }
 
-    public Map<String, List<Long>> getTable(Long riskId) {
+    public Map<String, List<Double>> getTable(Long riskId) {
         ProjectRisk risk = get(riskId);
-        Map<String, List<Long>> table = new HashMap<>();
+        Map<String, List<Double>> table = new HashMap<>();
         try (BufferedInputStream in = new BufferedInputStream(new URL(risk.getExcel().getUrl()).openStream())) {
             Workbook workbook = new XSSFWorkbook(in);
             for (var sheet : workbook) {
+                List<String> names = new ArrayList<>();
                 for (var col : sheet) {
-                    String colName = "";
+                    int i = 0;
                     for (var cell : col) {
                         if (cell.getAddress().getRow() == 0) {
-                            colName = cell.getStringCellValue();
+                            names.add(cell.getStringCellValue());
                             table.put(cell.getStringCellValue(), new ArrayList<>());
                         } else {
-                            table.get(colName).add(Long.parseLong(cell.getStringCellValue()));
+                            table.get(names.get(i)).add(cell.getNumericCellValue());
                         }
+                        i++;
                     }
-                    System.out.println();
                 }
             }
+            List<Double> budget = table.get("бюджет");
+            List<Double> losses = table.get("потери");
+            List<Double> impact = new ArrayList<>();
+            for (int i = 0; i < budget.size(); i++) {
+                impact.add(losses.get(i) / budget.get(i));
+            }
+            table.remove("бюджет");
+            table.remove("потери");
+            table.put("impact", impact);
+
             return table;
-        }catch (NumberFormatException e){
-            throw new AppException(e.getMessage());
-        }catch (MalformedURLException e) {
-            throw new AppException(e.getMessage());
+        } catch (NumberFormatException e) {
+            throw new AppException("Некорректный формат файла");
+        } catch (MalformedURLException e) {
+            throw new AppException("Некорректный формат файла");
         } catch (IOException e) {
-            throw new AppException(e.getMessage());
+            throw new AppException("Некорректный формат файла");
         }
     }
 

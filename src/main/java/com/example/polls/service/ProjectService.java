@@ -121,6 +121,7 @@ public class ProjectService {
                                 .cost(risk.getCost())
                                 .probability(risk.getProbability())
                                 .is_outer(risk.getIs_outer())
+                                .hasSensitivity(risk.getExcel() != null)
                                 .risk(RiskDto.builder()
                                         .id(risk.getRisk().getId())
                                         .name(risk.getRisk().getName())

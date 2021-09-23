@@ -69,7 +69,7 @@ public class ProjectController {
 
     @PostMapping("/risks/file/{riskId}")
     @PreAuthorize("hasRole('USER')")
-    public Map<String, List<Long>> saveExcel(@RequestParam(value = "file", required = true) MultipartFile file,
+    public Map<String, List<Double>> saveExcel(@RequestParam(value = "file", required = true) MultipartFile file,
                                              @PathVariable(name = "riskId", required = true) Long riskId) {
         try {
             AWSFile savedFile = fileService.store(file);
@@ -84,7 +84,7 @@ public class ProjectController {
 
     @GetMapping("/risks/file/{riskId}")
     @PreAuthorize("hasRole('USER')")
-    public Map<String, List<Long>> getExcel(@PathVariable(name = "riskId", required = true) Long riskId) {
+    public Map<String, List<Double>> getExcel(@PathVariable(name = "riskId", required = true) Long riskId) {
         return projectRiskService.getTable(riskId);
     }
 }
