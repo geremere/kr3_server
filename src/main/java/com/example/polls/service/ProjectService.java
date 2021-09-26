@@ -145,6 +145,29 @@ public class ProjectService {
 
     public List<ProjectResponse> list() {
         return projectRepository.findAll().stream()
+                .filter(project -> !project.isDeleted())
+                .map(this::getResponse)
+                .collect(Collectors.toList());
+    }
+
+    public void delete(Long id){
+        Project project = get(id);
+        project.setDeleted(true);
+        projectRepository.save(project);
+    }
+
+    public List<ProjectResponse> listByUser(Long id){
+        User user = userService.getById(id);
+        return projectRepository.findAllByOwner(user).stream()
+                .filter(project -> !project.isDeleted())
+                .map(this::getResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProjectResponse> listByUserClosed(Long id){
+        User user = userService.getById(id);
+        return projectRepository.findAllByOwner(user).stream()
+                .filter(Project::isDeleted)
                 .map(this::getResponse)
                 .collect(Collectors.toList());
     }

@@ -4,6 +4,7 @@ import com.example.polls.model.Amazon.Image;
 import com.example.polls.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -36,6 +37,8 @@ public class Project {
     @OneToOne
     @JoinColumn(name = "image_id")
     private Image image;
+
+    private boolean isDeleted;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "projects_users",

@@ -49,7 +49,7 @@ public class ProjectController {
     }
 
 
-    @GetMapping("project/{prId}")
+    @GetMapping("/project/{prId}")
     public ResponseEntity<ProjectResponse> get(@PathVariable Long prId) throws ChangeSetPersister.NotFoundException {
         return ResponseEntity.ok(projectService.getResponse(projectService.get(prId)));
     }
@@ -70,7 +70,7 @@ public class ProjectController {
     @PostMapping("/risks/file/{riskId}")
     @PreAuthorize("hasRole('USER')")
     public Map<String, List<Double>> saveExcel(@RequestParam(value = "file", required = true) MultipartFile file,
-                                             @PathVariable(name = "riskId", required = true) Long riskId) {
+                                               @PathVariable(name = "riskId", required = true) Long riskId) {
         try {
             AWSFile savedFile = fileService.store(file);
             ProjectRisk risk = projectRiskService.get(riskId);
@@ -87,4 +87,23 @@ public class ProjectController {
     public Map<String, List<Double>> getExcel(@PathVariable(name = "riskId", required = true) Long riskId) {
         return projectRiskService.getTable(riskId);
     }
+
+    @DeleteMapping("/project/{id}")
+    @PreAuthorize("hasRole('USER')")
+    public void delete(@PathVariable(name = "id", required = true) Long id) {
+        projectService.delete(id);
+    }
+
+    @GetMapping("/project/user/{userId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<ProjectResponse>> getListByOwner(@PathVariable(name = "userId", required = true) Long userId) {
+        return ResponseEntity.ok(projectService.listByUser(userId));
+    }
+
+    @GetMapping("/project/closed/{userId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<ProjectResponse>> getListByOwnerClosed(@PathVariable(name = "userId", required = true) Long userId) {
+        return ResponseEntity.ok(projectService.listByUserClosed(userId));
+    }
+
 }
