@@ -17,7 +17,7 @@ import java.util.List;
 @Table(name = "chatroom")
 @Getter
 @Setter
-public class ChatRoom {
+public class ChatRoom{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -46,5 +46,4 @@ public class ChatRoom {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<User> users = new ArrayList<>();
-
 }

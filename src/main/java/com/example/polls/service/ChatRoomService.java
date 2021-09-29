@@ -1,5 +1,7 @@
 package com.example.polls.service;
 
+import com.example.polls.exception.AppException;
+import com.example.polls.exception.ResourceNotFoundException;
 import com.example.polls.model.chat.ChatMessage;
 import com.example.polls.model.chat.ChatRoom;
 import com.example.polls.model.user.User;
@@ -10,6 +12,7 @@ import com.example.polls.payload.chat.ChatRoomDto;
 import com.example.polls.payload.chat.MessageDto;
 import com.example.polls.repository.chat.ChatRoomRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,7 +66,7 @@ public class ChatRoomService {
                 .build();
     }
 
-    public MessageDto toDto(ChatMessage chatMessage){
+    public MessageDto toDto(ChatMessage chatMessage) {
         return MessageDto.builder()
                 .sender(userService.toSummary(chatMessage.getSender()))
                 .id(chatMessage.getId())
@@ -72,14 +75,14 @@ public class ChatRoomService {
                 .build();
     }
 
-    public ChatRoomShortDto toShortDto(ChatRoom chatRoom, Long currentUserId){
+    public ChatRoomShortDto toShortDto(ChatRoom chatRoom, Long currentUserId) {
         MessageDto lastMessage = chatRoom.getChatMessages().stream()
-                .reduce((f,s)->f.getUpdatedAt().compareTo(s.getUpdatedAt())>0?f:s)
+                .reduce((f, s) -> f.getUpdatedAt().compareTo(s.getUpdatedAt()) > 0 ? f : s)
                 .map(this::toDto)
-                .get();
+                .orElse(null);
         Long countNewMessages = chatRoom.getChatMessages().stream()
-                .filter(message-> !message.getSender().getId().equals(currentUserId))
-                .filter(message-> !message.isDelivered())
+                .filter(message -> !message.getSender().getId().equals(currentUserId))
+                .filter(message -> !message.isDelivered())
                 .count();
         return ChatRoomShortDto.builder()
                 .id(chatRoom.getId())
@@ -94,9 +97,9 @@ public class ChatRoomService {
                 .build();
     }
 
-    public ChatRoom findById(Long id){
-        ChatRoom chatRoom =  repository.findById(id);
-        chatRoom.getChatMessages().forEach(message-> message.setDelivered(true));
+    public ChatRoom findById(Long id) {
+        ChatRoom chatRoom = repository.findById(id);
+        chatRoom.getChatMessages().forEach(message -> message.setDelivered(true));
         return repository.save(chatRoom);
     }
 

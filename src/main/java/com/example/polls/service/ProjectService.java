@@ -150,13 +150,19 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
-    public void delete(Long id){
+    public List<Project> search(String title) {
+        return projectRepository.findAllByTitleContaining(title).stream()
+                .filter(project -> !project.isDeleted())
+                .collect(Collectors.toList());
+    }
+
+    public void delete(Long id) {
         Project project = get(id);
         project.setDeleted(true);
         projectRepository.save(project);
     }
 
-    public List<ProjectResponse> listByUser(Long id){
+    public List<ProjectResponse> listByUser(Long id) {
         User user = userService.getById(id);
         return projectRepository.findAllByOwner(user).stream()
                 .filter(project -> !project.isDeleted())
@@ -164,7 +170,7 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
-    public List<ProjectResponse> listByUserClosed(Long id){
+    public List<ProjectResponse> listByUserClosed(Long id) {
         User user = userService.getById(id);
         return projectRepository.findAllByOwner(user).stream()
                 .filter(Project::isDeleted)

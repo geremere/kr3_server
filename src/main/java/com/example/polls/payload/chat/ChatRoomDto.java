@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class ChatRoomDto {
+public class ChatRoomDto{
     private Long id;
     private List<UserSummary> users;
     private String title;

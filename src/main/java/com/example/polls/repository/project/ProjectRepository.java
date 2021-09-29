@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 public interface ProjectRepository extends JpaRepository<Project, String> {
     Optional<Project> findById(Long id);
     List<Project> findAllByOwner(User owner);
+    List<Project> findAllByTitleContaining(String title);
     List<Project> findAll();
 
 }

@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
@@ -46,6 +47,14 @@ public class ProjectController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<ProjectResponse>> list() {
         return ResponseEntity.ok(projectService.list());
+    }
+
+    @GetMapping("/project/search/{search}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<ProjectResponse>> search(@PathVariable(name = "search", required = false) String title) {
+        return ResponseEntity.ok(projectService.search(title).stream()
+                .map(projectService::getResponse)
+                .collect(Collectors.toList()));
     }
 
 
